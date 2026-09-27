@@ -1,0 +1,59 @@
+{
+  "name": "interval",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:e2e": "BASE_PATH=/interval/ SPA_404=true VITE_TMDB_READ_TOKEN=e2e-token vite build --outDir dist-e2e",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "check:bundle": "tsx scripts/check-bundle.ts",
+    "data:catalog": "tsx scripts/build-catalog.ts",
+    "data:ratings": "tsx scripts/build-ratings.ts",
+    "data:pull": "sh scripts/pull-data.sh"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.2.0",
+    "@fontsource-variable/noto-sans-devanagari": "^5.2.0",
+    "@fontsource-variable/public-sans": "^5.2.0",
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@tanstack/query-sync-storage-persister": "^5.80.0",
+    "@tanstack/react-query": "^5.80.0",
+    "@tanstack/react-query-persist-client": "^5.80.0",
+    "cmdk": "^1.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router": "^7.6.0",
+    "zustand": "^5.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@playwright/test": "^1.53.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.2",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  }
+}

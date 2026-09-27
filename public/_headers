@@ -1,0 +1,6 @@
+# Cloudflare Pages only; GitHub Pages ignores this file.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/data/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>Interval</title>
+  <rect width="32" height="32" rx="2" fill="#1C1420"/>
+  <rect x="9" y="7" width="5" height="18" fill="#E8A33D"/>
+  <rect x="18" y="7" width="5" height="18" fill="#F2EDE4"/>
+</svg>

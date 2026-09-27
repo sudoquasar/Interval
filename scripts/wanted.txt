@@ -1,0 +1,5 @@
+# IMDb IDs the nightly ratings job fetches before anything else, one per line.
+# Add titles that search surfaced without scores. A static site cannot record misses itself,
+# so this file (or the workflow's manual-run input) is how they reach the queue.
+#
+# tt0112870  Dilwale Dulhania Le Jayenge

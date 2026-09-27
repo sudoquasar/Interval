@@ -1,0 +1,88 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque/wdth.css';
+@import '@fontsource-variable/public-sans';
+@import '@fontsource-variable/noto-sans-devanagari';
+
+/*
+ * PLAN.md §6.2. The palette is reset so only these tokens exist: if a colour is not here,
+ * it does not belong in the interface. Marigold is THE accent; count its uses on a page.
+ */
+@theme {
+  --color-*: initial;
+  --color-ground: #1c1420;
+  --color-surface: #281c2e;
+  --color-edge: #3c2d43;
+  --color-ink: #f2ede4;
+  --color-ink-muted: #a0919e;
+  --color-marigold: #e8a33d;
+  --color-verdigris: #2e7d6f;
+  --color-rot: #c0503c;
+
+  --font-*: initial;
+  --font-display:
+    'Bricolage Grotesque Variable', 'Noto Sans Devanagari Variable', ui-sans-serif, system-ui,
+    sans-serif;
+  --font-sans:
+    'Public Sans Variable', 'Noto Sans Devanagari Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Type scale 13 / 15 / 17 / 21 / 28 / 40 / 64 */
+  --text-*: initial;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.35;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.3125rem;
+  --text-lg--line-height: 1.25;
+  --text-xl: 1.75rem;
+  --text-xl--line-height: 1.15;
+  --text-2xl: 2.5rem;
+  --text-2xl--line-height: 1.02;
+  --text-3xl: 4rem;
+  --text-3xl--line-height: 0.95;
+
+  /* A printed poster's corner, not a phone app's. */
+  --radius-sm: 2px;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-marigold);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-marigold);
+    color: var(--color-ground);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility scrollbar-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge) transparent;
+}
+
+@utility measure {
+  max-width: 68ch;
+}

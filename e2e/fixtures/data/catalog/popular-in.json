@@ -1,0 +1,45 @@
+{
+  "id": "popular-in",
+  "generated": "2026-09-26T21:10:00.000Z",
+  "items": [
+    {
+      "id": 20453,
+      "type": "movie",
+      "title": "3 Idiots",
+      "year": 2009,
+      "poster": null,
+      "vote": 8,
+      "votes": 2600,
+      "genres": [35, 18],
+      "lang": "hi",
+      "imdb": "tt1187043",
+      "scores": { "i": 8.4, "rt": 100 }
+    },
+    {
+      "id": 19404,
+      "type": "movie",
+      "title": "Dilwale Dulhania Le Jayenge",
+      "year": 1995,
+      "poster": null,
+      "vote": 8.5,
+      "votes": 4400,
+      "genres": [35, 18, 10749],
+      "lang": "hi",
+      "imdb": "tt0112870",
+      "scores": { "i": 8, "rt": 92 }
+    },
+    {
+      "id": 577922,
+      "type": "movie",
+      "title": "Tenet",
+      "year": 2020,
+      "poster": null,
+      "vote": 7.2,
+      "votes": 10000,
+      "genres": [28, 53, 878],
+      "lang": "en",
+      "imdb": "tt6723592",
+      "scores": { "i": 7.3, "rt": 69 }
+    }
+  ]
+}
