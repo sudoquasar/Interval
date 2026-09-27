@@ -1,0 +1,66 @@
+name: Deploy to Cloudflare Pages
+
+# Runs alongside the GitHub Pages deploy from Phase 1 so the Phase 3 move is a DNS change,
+# not a project (PLAN.md §3.2). Skips cleanly until Cloudflare is configured.
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [Enrich data]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - id: configured
+        name: Check Cloudflare configuration
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Set the CLOUDFLARE_API_TOKEN secret and CLOUDFLARE_ACCOUNT_ID variable to enable this deploy."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.configured.outputs.enabled == 'true'
+        uses: actions/checkout@v5
+      - if: steps.configured.outputs.enabled == 'true'
+        uses: pnpm/action-setup@v4
+      - if: steps.configured.outputs.enabled == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: steps.configured.outputs.enabled == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.configured.outputs.enabled == 'true'
+        name: Copy the published data branch into public/data
+        run: sh scripts/pull-data.sh public/data || echo "::warning::No data branch yet."
+      - if: steps.configured.outputs.enabled == 'true'
+        name: Build
+        # No 404.html here: without one, Cloudflare Pages serves index.html for every route.
+        run: pnpm build
+        env:
+          VITE_TMDB_READ_TOKEN: ${{ vars.TMDB_READ_TOKEN || secrets.TMDB_READ_TOKEN }}
+          BASE_PATH: /
+      - if: steps.configured.outputs.enabled == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME || 'interval' }} --branch=main

@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [Enrich data]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # After a nightly run, deploy only if it succeeded.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - id: pages
+        uses: actions/configure-pages@v5
+      - name: Check the TMDB attribution logo is present
+        run: test -f public/tmdb-logo.svg || echo "::warning::public/tmdb-logo.svg is missing. TMDB's terms require their logo in the footer; download it from themoviedb.org/about/logos-attribution."
+      - name: Copy the published data branch into public/data
+        run: sh scripts/pull-data.sh public/data || echo "::warning::No data branch yet. Deploying without catalogue data; run the Enrich data workflow."
+      - name: Build
+        run: pnpm build
+        env:
+          # Read-only TMDB token; it ships in the bundle during Phases 1–2 (PLAN.md §7.5).
+          VITE_TMDB_READ_TOKEN: ${{ vars.TMDB_READ_TOKEN || secrets.TMDB_READ_TOKEN }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+          SPA_404: 'true'
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
