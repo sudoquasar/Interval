@@ -1,15 +1,17 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { app } from '../../../config/app.config';
 import { accentHoverClass } from '../../lib/accents';
-import { genreRailId, popularRailId, RAIL } from '../../lib/catalog-format';
+import { popularRailId, RAIL } from '../../lib/catalog-format';
 import { cx } from '../../lib/cx';
 import { regionName } from '../../lib/format';
-import { GENRES, genreForId } from '../../lib/genres';
+import { GENRES } from '../../lib/genres';
 import { useDocumentTitle } from '../../lib/hooks';
 import { useRail } from '../../lib/queries';
 import { usePreferences } from '../../store/preferences';
 import { Notice } from '../../ui/Notice';
 import { Rail } from '../../ui/Rail';
+import { DiscoverBar } from './DiscoverBar';
 import { Hero } from './Hero';
 
 function CatalogRail({
@@ -17,17 +19,21 @@ function CatalogRail({
   title,
   moreHref,
   eagerCount,
+  limit,
 }: {
   id: string;
   title: string;
   moreHref?: string;
   eagerCount?: number;
+  /** Home rails show a curated slice, not the full stored list — the page is a taster, not a wall. */
+  limit?: number;
 }) {
   const { data, isPending } = useRail(id);
+  const items = limit ? data?.items.slice(0, limit) : data?.items;
   return (
     <Rail
       title={title}
-      items={data?.items}
+      items={items}
       loading={isPending}
       moreHref={moreHref}
       eagerCount={eagerCount}
@@ -39,7 +45,7 @@ function GenreIndex() {
   return (
     <section aria-labelledby="genre-index" className="mt-20 px-4 sm:px-8">
       <h2 id="genre-index" className="font-display font-semibold text-lg">
-        Browse by genre
+        Or just pick a mood
       </h2>
       <ul className="mt-5 flex flex-wrap gap-2.5">
         {GENRES.map((genre, index) => (
@@ -79,6 +85,7 @@ export function HomePage() {
   const region = usePreferences((s) => s.region);
   const trending = useRail(RAIL.trending);
   const catalogueMissing = trending.isSuccess && trending.data === null;
+  const [discoverActive, setDiscoverActive] = useState(false);
 
   return (
     <>
@@ -86,25 +93,30 @@ export function HomePage() {
         {app.name}: {app.tagline.toLowerCase()}
       </h1>
       {catalogueMissing ? <MissingCatalogue /> : <Hero />}
-      <CatalogRail id={RAIL.trending} title="Trending this week" eagerCount={6} />
-      <CatalogRail id={popularRailId(region)} title={`Popular in ${regionName(region)}`} />
-      <CatalogRail id={RAIL.newThisMonth} title="New this month" />
-      <CatalogRail id={RAIL.indiaMovies} title="Indian cinema, most watched now" />
-      <CatalogRail id={RAIL.indiaSeries} title="Indian series" />
-      <CatalogRail id={RAIL.topMovies} title="Top rated of all time" />
-      <CatalogRail id={RAIL.topSeries} title="Top rated series" />
-      {app.genreRails.map((genreId) => {
-        const genre = genreForId(genreId, 'movie');
-        if (!genre) return null;
-        return (
+      <DiscoverBar onActiveChange={setDiscoverActive} />
+      {!discoverActive && (
+        <>
           <CatalogRail
-            key={genreId}
-            id={genreRailId(genreId)}
-            title={genre.name}
-            moreHref={`/genre/${genre.slug}`}
+            id={RAIL.trending}
+            title="Everyone's already seen this"
+            eagerCount={4}
+            limit={10}
           />
-        );
-      })}
+          <CatalogRail
+            id={popularRailId(region)}
+            title={`What ${regionName(region)} can't stop watching`}
+            limit={10}
+          />
+          <CatalogRail id={RAIL.newThisMonth} title="Hot off the reel" limit={10} />
+          <CatalogRail id={RAIL.indiaMovies} title="India's current obsessions" limit={10} />
+          <CatalogRail id={RAIL.indiaSeries} title="Shows to lose a weekend to" limit={10} />
+          <CatalogRail
+            id={RAIL.topMovies}
+            title="The ones everyone pretends they've seen"
+            limit={8}
+          />
+        </>
+      )}
       <GenreIndex />
     </>
   );

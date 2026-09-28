@@ -4,28 +4,33 @@
 @import '@fontsource-variable/noto-sans-devanagari';
 
 /*
- * PLAN.md §6.2 (redesign: docs/DECISIONS.md "lively minimalist" entry). The base stays a calm
- * dark aubergine so posters keep supplying the loudest colour, but the accent family grew from
- * one gold to a curated jewel-tone set, each with one job, and interaction is welcome again:
- * hover, motion and colour are how the interface earns "lively" without turning into clutter.
+ * PLAN.md §6.2 (redesign: docs/DECISIONS.md "lively minimalist" + "light by default" entries).
+ * Light is the default surface now — bright, warm, saturated — with the original dark aubergine
+ * kept as the toggled alternative (`[data-theme="dark"]` below). Every colour is a real CSS
+ * custom property, never a baked-in hex, so a single toggle repaints the whole interface. The
+ * accent family (marigold/verdigris/coral/violet/azure/rot) keeps one job each; only the exact
+ * shade differs per theme, tuned so every use — large tier numbers and small chip labels alike —
+ * clears 4.5:1 against its own ground.
  */
 @theme {
   --color-*: initial;
-  --color-ground: #1c1420;
-  --color-surface: #281c2e;
-  --color-surface-high: #33243b;
-  --color-edge: #3c2d43;
-  --color-ink: #f2ede4;
-  --color-ink-muted: #a0919e;
+  --color-ground: #fff7ec;
+  --color-surface: #ffffff;
+  --color-surface-high: #fdeeda;
+  --color-edge: #e7dac5;
+  --color-ink: #23182b;
+  --color-ink-muted: #6e5f68;
 
   /* One job each: marigold acts, verdigris affirms, coral delights, violet categorises, azure
      informs, rot warns. Still a small, closed set — variety with a system behind it. */
-  --color-marigold: #e8a33d;
-  --color-verdigris: #33b39b;
-  --color-coral: #f2577c;
-  --color-violet: #a672e0;
-  --color-azure: #4fade8;
-  --color-rot: #e2583f;
+  --color-marigold: #9f6604;
+  --color-verdigris: #0a7f62;
+  --color-coral: #de1248;
+  --color-violet: #7d30e8;
+  --color-azure: #0f77b8;
+  --color-rot: #d83218;
+  /* Text drawn on top of a solid accent fill (buttons, the checked state of a toggle). */
+  --color-on-accent: #fff7ec;
 
   --font-*: initial;
   --font-display:
@@ -62,13 +67,32 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     background-color: var(--color-ground);
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  /* The original dark aubergine theme, now the toggled alternative (src/store/theme.ts sets this
+     attribute; index.html sets it before first paint to avoid a flash for returning visitors). */
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --color-ground: #1c1420;
+    --color-surface: #281c2e;
+    --color-surface-high: #33243b;
+    --color-edge: #3c2d43;
+    --color-ink: #f2ede4;
+    --color-ink-muted: #a0919e;
+    --color-marigold: #e8a33d;
+    --color-verdigris: #33b39b;
+    --color-coral: #f2577c;
+    --color-violet: #a672e0;
+    --color-azure: #4fade8;
+    --color-rot: #e2583f;
+    --color-on-accent: #1c1420;
   }
 
   :focus-visible {
@@ -78,7 +102,7 @@
 
   ::selection {
     background-color: var(--color-marigold);
-    color: var(--color-ground);
+    color: var(--color-on-accent);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -2,9 +2,10 @@ import { Link, NavLink } from 'react-router';
 import { app } from '../../config/app.config';
 import { cx } from '../lib/cx';
 import { isRegion, usePreferences } from '../store/preferences';
+import { useTheme } from '../store/theme';
 import { useUi } from '../store/ui';
 import { useWatchlist } from '../store/watchlist';
-import { ChevronDownIcon, SearchIcon } from '../ui/icons';
+import { ChevronDownIcon, MoonIcon, SearchIcon, SunIcon } from '../ui/icons';
 import { Kbd } from '../ui/Kbd';
 import { preloadPalette } from './overlays';
 import { modKeyLabel } from './shortcuts';
@@ -59,6 +60,27 @@ function RegionSelect() {
   );
 }
 
+function ThemeToggle() {
+  const theme = useTheme((s) => s.theme);
+  const toggle = useTheme((s) => s.toggle);
+  const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={label}
+      title={label}
+      className="grid size-9 shrink-0 place-items-center rounded-full text-ink-muted transition-all duration-200 ease-snappy hover:scale-110 hover:bg-surface-high hover:text-marigold active:scale-95"
+    >
+      {theme === 'dark' ? (
+        <MoonIcon key="moon" className="size-4 animate-scale-in" />
+      ) : (
+        <SunIcon key="sun" className="size-4 animate-scale-in" />
+      )}
+    </button>
+  );
+}
+
 export function Header() {
   const saved = useWatchlist((s) => s.items.length);
   return (
@@ -72,6 +94,7 @@ export function Header() {
         </Link>
         <SearchTrigger />
         <RegionSelect />
+        <ThemeToggle />
         <NavLink
           to="/watchlist"
           className={({ isActive }) =>

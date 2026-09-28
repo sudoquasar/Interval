@@ -12,7 +12,7 @@ export function buttonClass(variant: ButtonVariant = 'secondary', size: ButtonSi
     'disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100',
     size === 'md' ? 'h-10 px-4 text-sm' : 'h-8 px-3 text-xs',
     variant === 'primary' &&
-      'bg-marigold text-ground shadow-[0_8px_24px_-10px_rgb(232_163_61_/_70%)] hover:scale-[1.02] hover:brightness-110 hover:shadow-[0_10px_30px_-8px_rgb(232_163_61_/_85%)]',
+      'bg-marigold text-on-accent shadow-[0_8px_24px_-10px_color-mix(in_oklab,var(--color-marigold)_70%,transparent)] hover:scale-[1.02] hover:brightness-110 hover:shadow-[0_10px_30px_-8px_color-mix(in_oklab,var(--color-marigold)_85%,transparent)]',
     variant === 'secondary' &&
       'border border-edge text-ink hover:border-marigold/60 hover:bg-surface-high',
     variant === 'quiet' && 'px-0 text-ink-muted underline-offset-4 hover:text-ink hover:underline',

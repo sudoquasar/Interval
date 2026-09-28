@@ -97,7 +97,7 @@ function TypeToggle({
         {options.map((type) => (
           <label
             key={type}
-            className="flex cursor-pointer items-center px-3 text-ink-muted text-sm transition-colors duration-200 hover:text-ink has-[:checked]:bg-marigold has-[:checked]:text-ground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-marigold"
+            className="flex cursor-pointer items-center px-3 text-ink-muted text-sm transition-colors duration-200 hover:text-ink has-[:checked]:bg-marigold has-[:checked]:text-on-accent has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-marigold"
           >
             <input
               type="radio"

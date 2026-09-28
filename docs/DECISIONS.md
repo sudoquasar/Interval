@@ -71,3 +71,37 @@ number means the same colour everywhere it appears.
 posters and imagery only. Buttons, dialogs, chips and form controls moved to Tailwind's default
 `md`/`lg`/`full` radii, so content and touch targets read as two deliberately different materials.
 
+## 2026-09-28 · Light-default theme, decluttered home page
+
+**Light became the default theme; dark moved behind a toggle instead of being replaced.** The
+first redesign pass that day kept the original dark palette but made everything else louder
+around it. Landing on a near-black page by default reads wrong for most first visits, so light
+is now what a new visitor sees, and dark survives as a fully-supported alternative rather than
+a deprecated one — `src/store/theme.ts` persists the choice, and an inline script in
+`index.html`'s `<head>` applies it before first paint so there is no flash of the wrong theme.
+
+**Every accent got an independent light-mode hex, not an auto-derived one.** A naive lighten of
+the dark accents failed the 4.5:1 contrast floor in one direction or the other for most of the
+five (see PLAN.md §6.2). Each colour was picked and checked by computing both the text-on-ground
+and text-on-accent-fill contrast ratios directly, so light mode is not a filtered version of dark
+mode — it is a second palette held to the same bar.
+
+**Hardcoded colour literals were a theme bug waiting to happen.** Three places (`Button.tsx`,
+`Layout.tsx`'s skip link, `GenrePage.tsx`'s checked state) used `text-ground`, which in the old
+single-theme world happened to mean "readable on a filled accent" but breaks the moment `ground`
+and "readable on accent" diverge, which light mode does immediately. Introduced `--on-accent` as
+its own token and a `text-on-accent` utility so "text that sits on a solid accent fill" is named
+for what it does, not aliased to a background token that happens to share its value in one theme.
+Same fix for three hardcoded shadow `rgba()` literals, replaced with
+`color-mix(in oklab, var(--color-x) N%, transparent)`.
+
+**The home page traded genre-rail breadth for one interactive filter.** PLAN.md §7.1 originally
+listed "one rail per major genre" as proof the catalogue was deep; in practice it was six rails
+of the same ~10 posters restated with a different sort. Replaced with `DiscoverBar`
+(`src/features/browse/DiscoverBar.tsx`): pick any number of genres — OR'd via TMDB `with_genres`'s
+pipe syntax — plus a rating floor, and it swaps the curated rails for a live `/discover` grid.
+Clearing every genre brings the rails back. The curated rails that remain were cut from ten to
+six and given a dry, specific voice ("Everyone's already seen this", "The ones everyone pretends
+they've seen") instead of literal labels, on the theory that a section name is copy, not a
+data label.
+
