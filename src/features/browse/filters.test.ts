@@ -99,4 +99,24 @@ describe('toDiscoverParams', () => {
       'vote_count.gte': 10,
     });
   });
+
+  it('is unchanged when no watch filter is given', () => {
+    expect(toDiscoverParams(parse(''), comedy, TODAY, 200)).toEqual({
+      with_genres: 35,
+      sort_by: 'popularity.desc',
+      page: 1,
+    });
+  });
+
+  it('merges exactly the three watch params when given', () => {
+    const params = toDiscoverParams(parse(''), comedy, TODAY, 200, {
+      owned: new Set([119, 8]),
+      region: 'IN',
+    });
+    expect(params).toMatchObject({
+      watch_region: 'IN',
+      with_watch_providers: '8|119',
+      with_watch_monetization_types: 'flatrate|free|ads',
+    });
+  });
 });

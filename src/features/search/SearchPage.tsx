@@ -1,8 +1,12 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { app } from '../../../config/app.config';
 import { cx } from '../../lib/cx';
 import { formatCount } from '../../lib/format';
 import { useDocumentTitle } from '../../lib/hooks';
+import { type TitleSummary, titleKey } from '../../lib/model';
+import { useOwnedSet, useWatchLookups } from '../../lib/providers';
+import { watchableState } from '../../lib/providers-format';
 import { useSearch } from '../../lib/queries';
 import { TMDB_MAX_PAGE } from '../../lib/tmdb';
 import { usePreferences } from '../../store/preferences';
@@ -11,10 +15,70 @@ import { Notice } from '../../ui/Notice';
 import { Pagination } from '../../ui/Pagination';
 import { PosterGrid, PosterGridSkeleton } from '../../ui/PosterGrid';
 import { QueryError } from '../../ui/QueryError';
+import { WatchableToggle } from '../watch/WatchableToggle';
+import { partitionByWatchable } from './partition';
 
 function pageFrom(value: string | null): number {
   const page = Number(value);
   return Number.isInteger(page) && page >= 1 ? Math.min(page, TMDB_MAX_PAGE) : 1;
+}
+
+/** Partitioned when the Watchable-now lens is on and services are set; otherwise a plain grid.
+ * Nothing is ever hidden — partitioning only relabels the same results (docs/phase-2-plan.md §3.5). */
+function ResultsGrid({ items }: { items: TitleSummary[] }) {
+  const ownedIds = usePreferences((s) => s.ownedProviders);
+  const owned = useOwnedSet(ownedIds);
+  const watchableOnly = usePreferences((s) => s.watchableOnly);
+  const lensOn = app.features.watchProviders && watchableOnly && ownedIds.length > 0;
+  const lookups = useWatchLookups(items, app.defaultRegion, lensOn);
+
+  if (!lensOn || lookups.pending) return <PosterGrid items={items} />;
+
+  const states = new Map(
+    items.map((item) => {
+      const key = titleKey(item.type, item.id);
+      return [key, watchableState(lookups.byKey.get(key), owned)] as const;
+    }),
+  );
+  const { yes, unknown, no } = partitionByWatchable(items, states);
+
+  return (
+    <div className="flex flex-col gap-10">
+      {yes.length > 0 && (
+        <section aria-labelledby="watch-yes-heading">
+          <h2
+            id="watch-yes-heading"
+            className="mb-4 font-display font-semibold text-lg text-verdigris"
+          >
+            On your services
+          </h2>
+          <PosterGrid items={yes} />
+        </section>
+      )}
+      {unknown.length > 0 && (
+        <section aria-labelledby="watch-unknown-heading">
+          <h2
+            id="watch-unknown-heading"
+            className="mb-4 font-display font-semibold text-ink-muted text-lg"
+          >
+            Couldn&rsquo;t check
+          </h2>
+          <PosterGrid items={unknown} />
+        </section>
+      )}
+      {no.length > 0 && (
+        <section aria-labelledby="watch-no-heading">
+          <h2
+            id="watch-no-heading"
+            className="mb-4 font-display font-semibold text-ink-muted text-lg"
+          >
+            Not on your services
+          </h2>
+          <PosterGrid items={no} />
+        </section>
+      )}
+    </div>
+  );
 }
 
 export default function SearchPage() {
@@ -83,7 +147,7 @@ export default function SearchPage() {
             .
           </p>
         )}
-        <PosterGrid items={data.items} />
+        <ResultsGrid items={data.items} />
         <Pagination
           page={page}
           totalPages={data.totalPages}
@@ -115,10 +179,16 @@ export default function SearchPage() {
           />
         </div>
       </form>
-      <p aria-live="polite" className="mt-6 h-6 text-ink-muted text-sm">
-        {hasQuery && data && !search.isPlaceholderData
-          ? `${formatCount(data.totalResults)} results`
-          : ''}
+      <p
+        aria-live="polite"
+        className="mt-6 flex h-6 flex-wrap items-center gap-4 text-ink-muted text-sm"
+      >
+        <span>
+          {hasQuery && data && !search.isPlaceholderData
+            ? `${formatCount(data.totalResults)} results`
+            : ''}
+        </span>
+        {app.features.watchProviders && hasQuery && <WatchableToggle />}
       </p>
       <div className={cx('mt-4', search.isPlaceholderData && 'opacity-60')}>{body}</div>
     </div>

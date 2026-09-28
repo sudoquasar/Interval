@@ -1,7 +1,8 @@
 # Interval
 
 What to watch, and where. A static film and series discovery site with IMDb, Rotten Tomatoes,
-Metacritic and TMDB scores side by side. Phase 1 of [PLAN.md](PLAN.md).
+Metacritic and TMDB scores side by side, plus where each title streams, rents or buys in India.
+Phase 1 and Phase 2 of [PLAN.md](PLAN.md) (see [docs/phase-2-plan.md](docs/phase-2-plan.md)).
 
 Non-commercial by design: TMDB's free tier and OMDb's CC BY-NC licence both depend on it.
 
@@ -32,6 +33,9 @@ OMDB_MAX_NEW=50 pnpm data:ratings   # OMDb → public/data/ratings/NN.json
 | `pnpm e2e` | Playwright smoke tests against a GitHub-Pages-like server, TMDB mocked |
 | `pnpm lint` / `pnpm lint:fix` | Biome |
 | `pnpm check:bundle` | Fails if first-load JS exceeds 180 KB gzipped |
+| `pnpm data:catalog` | TMDB → `public/data/catalog/*.json` |
+| `pnpm data:providers` | TMDB watch/providers → `public/data/providers-tmdb-in.json`, folds `watch` into every catalogue entry |
+| `pnpm data:ratings` | OMDb → `public/data/ratings/NN.json` |
 
 ## One-time setup (PLAN.md §16, Phase 0)
 
@@ -56,6 +60,8 @@ OMDB_MAX_NEW=50 pnpm data:ratings   # OMDb → public/data/ratings/NN.json
 ```
 Nightly, 02:30 IST (.github/workflows/enrich-data.yml)
   build-catalog.ts   TMDB lists → data/catalog/<rail>.json, resolves IMDb IDs
+  build-providers.ts TMDB watch/providers → data/providers-tmdb-in.json,
+                     folds `watch` (India availability) into every catalogue entry
   build-ratings.ts   OMDb, ≤500 new + ≤500 stale, hard cap 1,000 → data/ratings/00…99.json
                      then folds scores into the catalogue entries
   force-push         `data` branch, one squashed commit
@@ -63,8 +69,10 @@ Deploy (on push to main, and after each nightly run)
   data branch → public/data → vite build → GitHub Pages and Cloudflare Pages
 ```
 
-The browser calls TMDB directly for search and title pages, and reads ratings from the
-prebuilt shards. It never talks to OMDb and never sees the OMDb key.
+The browser calls TMDB directly for search, title pages and per-result availability lookups, and
+reads ratings from the prebuilt shards. It never talks to OMDb and never sees the OMDb key. A
+title page's own availability comes bundled into the same TMDB detail call
+(`append_to_response=watch/providers`), not a separate request.
 
 Search can surface titles the ratings index has not reached yet; they show "—" for IMDb and
 RT. Add their IMDb IDs to `scripts/wanted.txt` (or the workflow's manual-run input) and the
@@ -73,8 +81,14 @@ next run fetches them first.
 ## Where things live
 
 - `config/app.config.ts`: name, regions, home genre rails, credibility floor, cache TTLs.
-- `src/lib/`: TMDB client and types, ratings shard loader, shared formats.
-- `src/features/`: browse (home, genre), search, title, watchlist.
+- `config/providers.ts`, `config/provider-links.ts`: the streaming-service picker list, provider
+  ID aliases, and verified tier-2 search-link URLs (docs/phase-2-plan.md §4.4).
+- `public/providers-in.json`: hand-maintained India subscription prices, re-verified quarterly
+  (docs/RUNBOOK.md).
+- `src/lib/`: TMDB client and types, ratings shard loader, watch-providers formatting, shared formats.
+- `src/features/`: browse (home, genre), search, title, watch (availability block, services
+  picker, Watchable-now toggle), watchlist.
 - `src/ui/`: the handful of primitives: poster card, rail, grid, scorecard and friends.
 - `scripts/`: the nightly pipeline and its tests.
 - `docs/DECISIONS.md`: why things are the way they are. `docs/RUNBOOK.md`: what breaks.
+  `docs/phase-2-plan.md`: the Phase 2 ("where to watch") implementation plan.

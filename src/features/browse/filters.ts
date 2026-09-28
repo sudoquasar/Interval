@@ -1,5 +1,6 @@
 import type { Genre } from '../../lib/genres';
 import type { MediaType } from '../../lib/model';
+import { discoverWatchParams } from '../../lib/providers-format';
 import { TMDB_MAX_PAGE } from '../../lib/tmdb';
 
 /**
@@ -109,12 +110,14 @@ export function hasActiveFilters(filters: GenreFilters): boolean {
   );
 }
 
-/** Maps URL filters onto TMDB `/discover` parameters. */
+/** Maps URL filters onto TMDB `/discover` parameters. `watch`, when given, merges
+ * `discoverWatchParams` so "Watchable now" narrows the same query server-side. */
 export function toDiscoverParams(
   filters: GenreFilters,
   genre: Genre,
   today: string,
   minVoteCount: number,
+  watch?: { owned: ReadonlySet<number>; region: string },
 ): Record<string, string | number> {
   const genreId = genre[filters.type];
   const dateField = filters.type === 'movie' ? 'primary_release_date' : 'first_air_date';
@@ -149,5 +152,6 @@ export function toDiscoverParams(
     params[`${dateField}.lte`] = upper;
   }
   if (filters.lang) params.with_original_language = filters.lang;
+  if (watch) Object.assign(params, discoverWatchParams(watch.owned, watch.region));
   return params;
 }

@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "region": "IN",
+  "providers": [
+    {
+      "provider_id": 8,
+      "name": "Netflix",
+      "plans": [
+        {
+          "name": "Mobile",
+          "inr": 149,
+          "per": "month",
+          "ads": false,
+          "note": "Phone or tablet only"
+        },
+        { "name": "Basic", "inr": 199, "per": "month", "ads": false },
+        { "name": "Standard", "inr": 499, "per": "month", "ads": false },
+        { "name": "Premium", "inr": 649, "per": "month", "ads": false }
+      ],
+      "note": "Included with some Jio and Airtel plans",
+      "source": "https://help.netflix.com/en/node/24926/in",
+      "verified": "2026-09-28"
+    },
+    {
+      "provider_id": 119,
+      "name": "Prime Video",
+      "plans": [
+        { "name": "Prime", "inr": 299, "per": "month", "ads": true },
+        { "name": "Prime", "inr": 599, "per": "quarter", "ads": true },
+        { "name": "Prime", "inr": 1499, "per": "year", "ads": true },
+        { "name": "Prime Lite", "inr": 799, "per": "year", "ads": true, "note": "One device, HD" }
+      ],
+      "note": "Ad-free is ₹129 a month extra. Prime also includes shopping benefits",
+      "source": "https://www.amazon.in/gp/help/customer/display.html?nodeId=G34EUPKVMYFW8N2U",
+      "verified": "2026-09-28"
+    },
+    {
+      "provider_id": 2336,
+      "name": "JioHotstar",
+      "plans": [
+        {
+          "name": "Mobile",
+          "inr": 79,
+          "per": "month",
+          "ads": true,
+          "note": "One phone; Hollywood titles need a ₹49 add-on"
+        },
+        { "name": "Super", "inr": 149, "per": "month", "ads": true },
+        { "name": "Premium", "inr": 299, "per": "month", "ads": false },
+        { "name": "Premium", "inr": 2199, "per": "year", "ads": false }
+      ],
+      "note": "Often bundled with Jio and Airtel plans",
+      "source": "https://techcrunch.com/2026/09/01/reliances-jiohotstar-takes-its-streaming-empire-global-without-sports/",
+      "verified": "2026-09-28"
+    },
+    {
+      "provider_id": 237,
+      "name": "Sony LIV",
+      "plans": [
+        { "name": "Premium", "inr": 399, "per": "month", "ads": false },
+        { "name": "Premium", "inr": 1499, "per": "year", "ads": false },
+        { "name": "Mobile Only", "inr": 699, "per": "year", "ads": false }
+      ],
+      "note": "Sport and live shows still carry ads",
+      "source": "https://helpdev.sonyliv.com/categories/cat-subscription/articles/what-are-the-types-of-subscription-available-on-liv-how-much-does-sony-liv-cost-1",
+      "verified": "2026-09-28"
+    },
+    {
+      "provider_id": 350,
+      "name": "Apple TV",
+      "plans": [{ "name": "iCloud+ 50 GB", "inr": 75, "per": "month", "ads": false }],
+      "note": "No longer sold on its own in India; comes with every iCloud+ plan",
+      "source": "https://support.apple.com/en-in/108047",
+      "verified": "2026-09-28"
+    },
+    {
+      "provider_id": 232,
+      "name": "ZEE5",
+      "plans": [
+        { "name": "All languages", "inr": 299, "per": "month", "ads": true },
+        { "name": "Hindi pack", "inr": 199, "per": "month", "ads": true }
+      ],
+      "note": "Single-language packs are cheaper",
+      "source": "https://www.zee5.com/global/blog/zee5-annual-vs-monthly-ott-subscriptions-which-is-better-for-indian-language-viewers/",
+      "verified": null
+    }
+  ]
+}

@@ -13,7 +13,17 @@
       "genres": [35, 18],
       "lang": "hi",
       "imdb": "tt1187043",
-      "scores": { "i": 8.4, "rt": 100 }
+      "scores": { "i": 8.4, "rt": 100 },
+      "watch": {
+        "checked": true,
+        "region": "IN",
+        "link": "https://www.themoviedb.org/movie/20453/watch?locale=IN",
+        "stream": [],
+        "free": [],
+        "ads": [],
+        "rent": [3, 192],
+        "buy": [3, 192]
+      }
     },
     {
       "id": 19404,
@@ -26,7 +36,17 @@
       "genres": [35, 18, 10749],
       "lang": "hi",
       "imdb": "tt0112870",
-      "scores": { "i": 8, "rt": 92 }
+      "scores": { "i": 8, "rt": 92 },
+      "watch": {
+        "checked": true,
+        "region": "IN",
+        "link": "https://www.themoviedb.org/movie/19404/watch?locale=IN",
+        "stream": [8],
+        "free": [],
+        "ads": [],
+        "rent": [],
+        "buy": []
+      }
     },
     {
       "id": 577922,
@@ -39,7 +59,17 @@
       "genres": [28, 53, 878],
       "lang": "en",
       "imdb": "tt6723592",
-      "scores": { "i": 7.3, "rt": 69 }
+      "scores": { "i": 7.3, "rt": 69 },
+      "watch": {
+        "checked": true,
+        "region": "IN",
+        "link": "https://www.themoviedb.org/movie/577922/watch?locale=IN",
+        "stream": [8, 119, 2100],
+        "free": [],
+        "ads": [],
+        "rent": [],
+        "buy": []
+      }
     }
   ]
 }

@@ -35,7 +35,7 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
     retry: removeOldestQuery,
   }),
   maxAge: DAY,
-  buster: 'v1',
+  buster: 'v2',
   dehydrateOptions: {
     shouldDehydrateQuery: (query) =>
       query.state.status === 'success' && query.queryKey[0] === 'tmdb',

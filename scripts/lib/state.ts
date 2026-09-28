@@ -24,5 +24,6 @@ export function statePaths(dataDir: string) {
     idmap: join(dir, 'idmap.json'),
     backlog: join(dir, 'backlog.json'),
     seed: join(dir, 'seed.json'),
+    availability: join(dir, 'availability.json'),
   };
 }

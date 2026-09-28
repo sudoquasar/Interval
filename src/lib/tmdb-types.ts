@@ -86,11 +86,39 @@ export interface TmdbExternalIds {
   imdb_id: string | null;
 }
 
+export interface TmdbWatchProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority: number;
+}
+
+export interface TmdbWatchRegion {
+  link?: string;
+  flatrate?: TmdbWatchProvider[];
+  free?: TmdbWatchProvider[];
+  ads?: TmdbWatchProvider[];
+  rent?: TmdbWatchProvider[];
+  buy?: TmdbWatchProvider[];
+}
+
+/** `/movie|tv/{id}/watch/providers`; also the appended `'watch/providers'` key (no `id`). */
+export interface TmdbWatchProviders {
+  id?: number;
+  results: Record<string, TmdbWatchRegion>;
+}
+
+/** `/watch/providers/{movie|tv}?watch_region=IN` entries. */
+export interface TmdbProviderCatalogEntry extends TmdbWatchProvider {
+  display_priorities?: Record<string, number>;
+}
+
 interface TmdbDetailAppends<R> {
   credits?: TmdbCredits;
   videos?: { results: TmdbVideo[] };
   recommendations?: TmdbPage<R>;
   external_ids?: TmdbExternalIds;
+  'watch/providers'?: TmdbWatchProviders;
 }
 
 export interface TmdbMovieDetail

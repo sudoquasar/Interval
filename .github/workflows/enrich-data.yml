@@ -48,6 +48,15 @@ jobs:
           DATA_DIR: data
           TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
 
+      - name: Fold in where-to-watch availability (TMDB / JustWatch)
+        # A providers failure keeps last night's provider catalogue and publishes tonight's
+        # rails without `watch`; the UI treats that as unknown, never as unavailable.
+        continue-on-error: true
+        run: pnpm data:providers
+        env:
+          DATA_DIR: data
+          TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
+
       - name: Fetch ratings from OMDb (hard cap 1,000 requests)
         # A rejected OMDb key fails this step visibly but still publishes tonight's catalogue.
         continue-on-error: true

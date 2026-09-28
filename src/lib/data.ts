@@ -4,6 +4,11 @@ export function dataUrl(path: string): string {
   return `${import.meta.env.BASE_URL}data/${path}?v=${encodeURIComponent(DATA_VERSION)}`;
 }
 
+/** A committed, hand-maintained file at the site root (not under `/data/`), e.g. `providers-in.json`. */
+export function publicUrl(path: string): string {
+  return `${import.meta.env.BASE_URL}${path}?v=${encodeURIComponent(DATA_VERSION)}`;
+}
+
 /**
  * Fetches a prebuilt JSON file from `/data`. Returns null when the file does not exist yet —
  * a catalogue that has not been built is a normal state, not an error.

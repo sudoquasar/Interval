@@ -136,4 +136,50 @@ doesn't depend on where the bar is set, only on which titles are being considere
 were nearly merged into one query keyed on the thresholds too; that would have re-run the external
 ID lookups on every dropdown change for no reason, so they were split.
 
+## 2026-09-28 · Phase 2: where to watch in India
+
+Full research and rationale in `docs/phase-2-plan.md`. The load-bearing decisions:
+
+1. **Availability comes appended to the title detail call, not a separate request.**
+   `append_to_response=watch/providers` on the same `/movie|tv/{id}` call TMDB already makes for
+   a title page adds ~2 KB gzip and zero extra round trips, with no second loading state for the
+   block to handle.
+2. **`checked:false` is unknown, never "not available."** A failed or not-yet-attempted lookup is
+   absent from the UI (the block renders nothing, a filtered rail simply excludes the title,
+   search puts it under "Couldn't check") — the copy never claims a title *isn't* available when
+   the honest answer is "we don't know."
+3. **"Watchable now" means stream ∪ free ∪ ads intersects your ticked services.** Free/ad-supported
+   apps count only when the viewer has actually ticked them, so the catalogue filter (client-side
+   `isWatchableWith`) and `/discover`'s server-side filter agree on the same definition.
+4. **The picker only offers services that stream.** Rent/buy stores (Apple TV Store, Google Play,
+   YouTube, Amazon Video, BookMyShow) are left out of `PICKER_PROVIDERS`, because TMDB's `/discover`
+   evaluates `with_watch_providers` and `with_watch_monetization_types` independently rather than
+   per-provider — a store ticked as "owned" would produce false-positive "watchable" matches on
+   titles that are only rentable there.
+5. **Plan variants alias to their parent; channels never do.** `config/providers.ts`'s
+   `PROVIDER_ALIASES` maps 2100→119 (Prime Video with Ads), 175→8 (Netflix Kids) and 515→1898
+   (the old MX Player brand), so owning the parent plan marks the variant as owned too. Add-on
+   "channels" (e.g. an Apple TV Amazon Channel) are deliberately never aliased — they are separate
+   subscriptions a person may not have.
+6. **Watchable-now is a persisted personal preference, not a URL parameter.** Unlike genre filters,
+   what a person can watch depends on services only they know about, so `usePreferences().
+   watchableOnly` lives in `localStorage`, never in a shareable link.
+7. **Search results are partitioned, not filtered.** `/search/multi` has no provider parameter, so
+   hiding "not on your services" results would require guessing; instead, each visible result gets
+   its own `/watch/providers` lookup (≤20 per page, cached) and the same page is split into "On
+   your services," "Couldn't check" and "Not on your services" sections, in that order, nothing
+   hidden.
+8. **Prices and tier-2 search links are hidden by default, shown only once verified.** A cost line
+   needs `verified` set and less than `priceStaleAfterDays` (120) old; a provider search link needs
+   a non-null `checked` date in `config/provider-links.ts`. Both default to hidden rather than
+   risking a stale or unconfirmed claim.
+9. **The region switcher lives inside the availability block, independent of the header's region
+   select.** The header's existing selector means "which Popular list," a pre-existing and
+   unrelated concept; coupling the two would silently change one control's meaning when the other
+   changes.
+10. **JustWatch attribution sits inside every availability block, and next to the Watchable-now
+    toggle when it's on, not only in the footer.** TMDB's own guidance for this data is "a
+    reference or logo on each media item," so the line travels with the data everywhere it
+    appears, with a single footer mention besides.
+
 

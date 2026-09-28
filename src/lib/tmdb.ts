@@ -1,3 +1,4 @@
+import { app } from '../../config/app.config';
 import {
   type MediaType,
   movieDetailToModel,
@@ -7,6 +8,7 @@ import {
   toSummary,
   tvDetailToModel,
 } from './model';
+import { toWatchInfo, type WatchInfo } from './providers-format';
 import type {
   TmdbExternalIds,
   TmdbMovieDetail,
@@ -14,6 +16,7 @@ import type {
   TmdbPage,
   TmdbTitleResult,
   TmdbTvDetail,
+  TmdbWatchProviders,
 } from './tmdb-types';
 
 const API_BASE = 'https://api.themoviedb.org/3';
@@ -123,7 +126,11 @@ export async function searchTitles(
   };
 }
 
-const DETAIL_APPENDS = 'credits,videos,recommendations,external_ids';
+const BASE_DETAIL_APPENDS = 'credits,videos,recommendations,external_ids';
+/** Kept off the wire (~2 KB) until `app.features.watchProviders` is on; see M8. */
+const DETAIL_APPENDS = app.features.watchProviders
+  ? `${BASE_DETAIL_APPENDS},watch/providers`
+  : BASE_DETAIL_APPENDS;
 
 /** One request per title page: `append_to_response` folds four endpoints into one. */
 export async function getTitle(
@@ -137,14 +144,24 @@ export async function getTitle(
       { append_to_response: DETAIL_APPENDS },
       signal,
     );
-    return movieDetailToModel(raw);
+    return movieDetailToModel(raw, app.regions);
   }
   const raw = await tmdbGet<TmdbTvDetail>(
     `/tv/${id}`,
     { append_to_response: DETAIL_APPENDS },
     signal,
   );
-  return tvDetailToModel(raw);
+  return tvDetailToModel(raw, app.regions);
+}
+
+/** Standalone endpoint (no `append_to_response`): used by search lookups and the nightly job. */
+export async function getWatchProviders(
+  type: MediaType,
+  id: number,
+  signal?: AbortSignal,
+): Promise<WatchInfo> {
+  const raw = await tmdbGet<TmdbWatchProviders>(`/${type}/${id}/watch/providers`, {}, signal);
+  return toWatchInfo(raw, app.regions) ?? { byRegion: {}, providers: {} };
 }
 
 export interface DiscoverResults {

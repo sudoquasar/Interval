@@ -1,3 +1,5 @@
+import type { Availability, CheckedAvailability, ProviderMeta } from './providers-format';
+import { toWatchInfo, UNCHECKED } from './providers-format';
 import type {
   TmdbCredits,
   TmdbMovieDetail,
@@ -31,6 +33,8 @@ export interface TitleSummary {
   lang: string;
   imdb?: string | null;
   scores?: CardScores;
+  /** Default region (IN) availability. Catalogue entries get it nightly; live results do not. */
+  watch?: Availability;
 }
 
 export interface Person {
@@ -58,6 +62,9 @@ export interface TitleDetail extends TitleSummary {
   trailer: { key: string; name: string } | null;
   recommendations: TitleSummary[];
   imdb: string | null;
+  watch: Availability;
+  watchByRegion: Record<string, CheckedAvailability>;
+  providerInfo: Record<number, ProviderMeta>;
 }
 
 export function titleKey(type: MediaType, id: number): string {
@@ -153,8 +160,12 @@ function uniquePeople(people: Person[]): Person[] {
   });
 }
 
-export function movieDetailToModel(raw: TmdbMovieDetail): TitleDetail {
+export function movieDetailToModel(
+  raw: TmdbMovieDetail,
+  regions: readonly string[] = ['IN'],
+): TitleDetail {
   const imdb = raw.imdb_id || raw.external_ids?.imdb_id || null;
+  const info = toWatchInfo(raw['watch/providers'], regions);
   return {
     ...toSummary({ ...raw, genre_ids: raw.genres.map((g) => g.id) }, 'movie'),
     overview: raw.overview,
@@ -178,11 +189,18 @@ export function movieDetailToModel(raw: TmdbMovieDetail): TitleDetail {
       .slice(0, 20)
       .map((r) => toSummary(r, 'movie')),
     imdb,
+    watch: info?.byRegion.IN ?? UNCHECKED,
+    watchByRegion: info?.byRegion ?? {},
+    providerInfo: info?.providers ?? {},
   };
 }
 
-export function tvDetailToModel(raw: TmdbTvDetail): TitleDetail {
+export function tvDetailToModel(
+  raw: TmdbTvDetail,
+  regions: readonly string[] = ['IN'],
+): TitleDetail {
   const runtime = raw.episode_run_time[0] ?? raw.last_episode_to_air?.runtime ?? null;
+  const info = toWatchInfo(raw['watch/providers'], regions);
   return {
     ...toSummary({ ...raw, genre_ids: raw.genres.map((g) => g.id) }, 'tv'),
     overview: raw.overview,
@@ -202,5 +220,8 @@ export function tvDetailToModel(raw: TmdbTvDetail): TitleDetail {
       .slice(0, 20)
       .map((r) => toSummary(r, 'tv')),
     imdb: raw.external_ids?.imdb_id || null,
+    watch: info?.byRegion.IN ?? UNCHECKED,
+    watchByRegion: info?.byRegion ?? {},
+    providerInfo: info?.providers ?? {},
   };
 }
