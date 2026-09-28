@@ -19,3 +19,6 @@ playwright-report/
 test-results/
 
 .DS_Store
+
+# JetBrains IDE metadata
+.idea/
