@@ -56,7 +56,7 @@ OMDB_MAX_NEW=50 pnpm data:ratings   # OMDb → public/data/ratings/NN.json
 ```
 Nightly, 02:30 IST (.github/workflows/enrich-data.yml)
   build-catalog.ts   TMDB lists → data/catalog/<rail>.json, resolves IMDb IDs
-  build-ratings.ts   OMDb, ≤800 new + ≤200 stale, hard cap 1,000 → data/ratings/00…99.json
+  build-ratings.ts   OMDb, ≤500 new + ≤500 stale, hard cap 1,000 → data/ratings/00…99.json
                      then folds scores into the catalogue entries
   force-push         `data` branch, one squashed commit
 Deploy (on push to main, and after each nightly run)

@@ -32,7 +32,7 @@ Environment variables read by `scripts/build-*.ts`. Change them in `enrich-data.
 | Variable | Default | Effect |
 |---|---|---|
 | `OMDB_DAILY_BUDGET` | 1000 | Hard request cap. Raise only during a paid backfill month |
-| `OMDB_MAX_NEW` / `OMDB_MAX_STALE` | 800 / 200 | New and refreshed titles per night |
+| `OMDB_MAX_NEW` / `OMDB_MAX_STALE` | 500 / 500 | New and refreshed titles per night |
 | `STALE_AFTER_DAYS` | 30 | Age at which a record is refreshed |
 | `OMDB_PACING_MS` | 300 | Delay between OMDb calls |
 | `BACKLOG_PAGES` | 10 | Pages per backlog list per night (20 titles each) |

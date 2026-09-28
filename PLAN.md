@@ -70,7 +70,7 @@ Nightly GitHub Action (02:30 IST)
   ├─ 1. Pull catalogue lists from TMDB       (trending, popular, top-rated,
   │                                            per-genre, Indian-origin)
   ├─ 2. Diff against ratings index → find IMDb IDs we don't have yet
-  ├─ 3. Fetch up to 800 new + 200 stale titles from OMDb   (≤1,000/day budget)
+  ├─ 3. Fetch up to 500 new + 500 stale titles from OMDb   (≤1,000/day budget)
   ├─ 4. Write sharded JSON  →  data/ratings/00.json … 99.json
   │                            data/catalog/*.json
   └─ 5. Force-push to orphan branch `data`  (single commit, no history bloat)
@@ -88,7 +88,7 @@ Record shape, kept deliberately terse because it is fetched over the wire:
 ```
 `i` IMDb rating · `iv` IMDb votes · `rt` Tomatometer · `mc` Metascore · `u` last updated
 
-**Coverage growth.** On the free tier you add ~800 titles a night, so ~24,000 in the first month — more than enough to cover everything a browse page will ever show. If you want full coverage immediately, pledge $1/month on OMDb's Patreon for one month, run a backfill at 100,000/day, and cancel. That is the correct use of ten cents.
+**Coverage growth.** On the free tier you add ~500 titles a night, so ~15,000 in the first month — more than enough to cover everything a browse page will ever show. The other 500 requests refresh titles older than 30 days, so coverage stays current rather than being spent entirely on breadth. If you want full coverage immediately, pledge $1/month on OMDb's Patreon for one month, run a backfill at 100,000/day, and cancel. That is the correct use of ten cents.
 
 **What happens on a cache miss.** Search results are live from TMDB and will occasionally surface a title not yet in the index. The card shows the TMDB user score alone, the IMDb/RT slots render as a quiet "—" rather than an error, and the title's IMDb ID is appended to a `wanted` list that the next nightly run prioritises. A miss is not a failure state and should not look like one.
 
@@ -378,7 +378,7 @@ Steps:
 
 1. Check out the `data` orphan branch into `./data` (create it on first run).
 2. `scripts/build-catalog.ts` — pull TMDB trending, popular, top-rated for movie and TV; `discover` with `with_origin_country=IN` sorted by popularity; and the top 100 per genre. Write one JSON per rail, each entry trimmed to the ~10 fields the UI actually renders. Expect ~400 KB total.
-3. `scripts/build-ratings.ts` — read every IMDb ID referenced by the catalogue plus the `wanted` queue, diff against the existing index, fetch **at most 800 new and 200 stale** titles from OMDb with a 300 ms pacing delay between calls, and merge. A hard counter aborts the run at 1,000 requests regardless of what the queue says.
+3. `scripts/build-ratings.ts` — read every IMDb ID referenced by the catalogue plus the `wanted` queue, diff against the existing index, fetch **at most 500 new and 500 stale** titles from OMDb with a 300 ms pacing delay between calls, and merge. A hard counter aborts the run at 1,000 requests regardless of what the queue says.
 4. Write shards, force-push `data` as a **single squashed commit** so the branch never accumulates history.
 
 **Three gotchas, all of which will bite you once:**

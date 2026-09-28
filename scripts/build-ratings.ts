@@ -1,6 +1,6 @@
 /**
  * Nightly step 2 (PLAN.md §2.2, §7.3): fetch IMDb / Rotten Tomatoes / Metacritic scores from
- * OMDb for up to 800 new and 200 stale titles, write the 100 ratings shards, and fold each rail
+ * OMDb for up to 500 new and 500 stale titles, write the 100 ratings shards, and fold each rail
  * entry's scores into its catalogue file so the home page needs no shard fetches at all.
  *
  * A hard counter stops the run at the daily budget whatever the queue says.
@@ -72,8 +72,8 @@ async function main() {
     deep: seed.deep,
     backlog: Object.values(idmap).filter(isImdbId),
     today,
-    maxNew: envInt('OMDB_MAX_NEW', 800),
-    maxStale: envInt('OMDB_MAX_STALE', 200),
+    maxNew: envInt('OMDB_MAX_NEW', 500),
+    maxStale: envInt('OMDB_MAX_STALE', 500),
     staleAfterDays: envInt('STALE_AFTER_DAYS', 30),
   });
 
