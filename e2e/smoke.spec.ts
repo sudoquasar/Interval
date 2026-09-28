@@ -35,10 +35,10 @@ test.beforeEach(async ({ page }) => {
 
 test('home renders populated rails and the TMDB notice', async ({ page }) => {
   await page.goto('./');
-  const trending = page.getByRole('region', { name: 'Trending this week' });
+  const trending = page.getByRole('region', { name: "Everyone's already seen this" });
   await expect(trending.getByRole('link')).toHaveCount(6);
   await expect(trending.getByRole('link', { name: /3 Idiots \(2009\) 8\.4 IMDb/ })).toBeVisible();
-  const popular = page.getByRole('region', { name: 'Popular in India' });
+  const popular = page.getByRole('region', { name: "What India can't stop watching" });
   await expect(popular.getByRole('link')).toHaveCount(3);
   await expect(page.getByRole('link', { name: 'See details' })).toBeVisible();
   await expect(
@@ -65,7 +65,7 @@ test('search from the command palette returns results', async ({ page }) => {
 test('a title page shows the scorecard, with an em dash for a missing score', async ({ page }) => {
   await page.goto('./');
   await page
-    .getByRole('region', { name: 'Trending this week' })
+    .getByRole('region', { name: "Everyone's already seen this" })
     .getByRole('link', { name: /Dilwale Dulhania Le Jayenge/ })
     .click();
 
