@@ -1,28 +1,71 @@
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { app } from '../../../config/app.config';
 import { accentHoverClass } from '../../lib/accents';
 import { cx } from '../../lib/cx';
 import { GENRES } from '../../lib/genres';
-import type { MediaType } from '../../lib/model';
-import { useDiscover } from '../../lib/queries';
+import type { MediaType, TitleSummary } from '../../lib/model';
+import { useDiscoverPages } from '../../lib/queries';
+import { fetchRatingsByImdbIds } from '../../lib/ratings';
+import { type RatingRecord, toCardScores } from '../../lib/ratings-format';
+import { getImdbId } from '../../lib/tmdb';
 import { Notice } from '../../ui/Notice';
 import { PosterGrid, PosterGridSkeleton } from '../../ui/PosterGrid';
 import { QueryError } from '../../ui/QueryError';
+import { MIN_RATINGS } from './filters';
 
-const RATINGS = [6, 7, 8] as const;
+const RT_THRESHOLDS = [50, 70, 90] as const;
+
+/** A page of live discover results cross-referenced against each title's IMDb/RT scores. */
+function useExternalRatings(type: MediaType, items: TitleSummary[] | undefined, enabled: boolean) {
+  const ids = items?.map((item) => item.id) ?? [];
+  return useQuery({
+    queryKey: ['discover-ratings', type, ids] as const,
+    queryFn: async ({ signal }) => {
+      const list = items ?? [];
+      const imdbIds = await Promise.all(
+        list.map(async (item) => {
+          try {
+            return await getImdbId(type, item.id, signal);
+          } catch {
+            return null; // one title's lookup failing shouldn't sink the whole batch
+          }
+        }),
+      );
+      const ratings = await fetchRatingsByImdbIds(imdbIds, signal);
+      return list.map((item, index) => {
+        const imdbId = imdbIds[index];
+        const record: RatingRecord | undefined = imdbId ? ratings.get(imdbId) : undefined;
+        return { item, record };
+      });
+    },
+    enabled: enabled && (items?.length ?? 0) > 0,
+    placeholderData: keepPreviousData,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+}
 
 /**
  * A home-page-top, multi-genre filter: pick any number of genres (OR'd together via TMDB's
- * `with_genres` pipe syntax) plus a rating floor, and the curated rails below make way for a
+ * `with_genres` pipe syntax) plus rating floors, and the curated rails below make way for a
  * live `/discover` grid. Clearing every genre brings the normal home page back.
+ *
+ * TMDB's own rating filters at the API level (`vote_average.gte`); IMDb and Rotten Tomatoes
+ * scores don't exist in TMDB's data at all, so those two floors are applied client-side after
+ * resolving each candidate's IMDb ID and looking it up in the same ratings shards the rest of
+ * the app uses. That cross-reference can only narrow a page of results, never widen it, so a
+ * second discover page is pulled in as extra candidates whenever either floor is active.
  */
 export function DiscoverBar({ onActiveChange }: { onActiveChange?: (active: boolean) => void }) {
   const [type, setType] = useState<MediaType>('movie');
   const [selected, setSelected] = useState<number[]>([]);
-  const [minRating, setMinRating] = useState(0);
+  const [minTmdb, setMinTmdb] = useState(0);
+  const [minImdb, setMinImdb] = useState(0);
+  const [minRt, setMinRt] = useState(0);
 
   const options = useMemo(() => GENRES.filter((g) => g[type] !== null), [type]);
   const active = selected.length > 0;
+  const externalFilterActive = minImdb > 0 || minRt > 0;
 
   useEffect(() => {
     onActiveChange?.(active);
@@ -31,14 +74,38 @@ export function DiscoverBar({ onActiveChange }: { onActiveChange?: (active: bool
   const params = useMemo(() => {
     const p: Record<string, string | number> = { sort_by: 'popularity.desc', page: 1 };
     if (selected.length > 0) p.with_genres = selected.join('|');
-    if (minRating > 0) {
-      p['vote_average.gte'] = minRating;
+    if (minTmdb > 0) {
+      p['vote_average.gte'] = minTmdb;
       p['vote_count.gte'] = app.minVoteCount;
     }
     return p;
-  }, [selected, minRating]);
+  }, [selected, minTmdb]);
 
-  const query = useDiscover(type, params);
+  const query = useDiscoverPages(type, params, externalFilterActive ? 2 : 1);
+  const enrichment = useExternalRatings(
+    type,
+    query.data?.items,
+    // Wait for the real (non-placeholder) page: toggling a floor changes the page count, so the
+    // query briefly shows the previous, differently-sized page while the new one loads. Enriching
+    // that placeholder would just be thrown away the moment the real data lands.
+    active && externalFilterActive && !query.isPlaceholderData,
+  );
+
+  const results = useMemo(() => {
+    if (!query.data) return undefined;
+    if (!externalFilterActive) return query.data.items;
+    if (!enrichment.data) return undefined;
+    return enrichment.data
+      .filter(({ record }) => {
+        if (minImdb > 0 && (record?.i === undefined || record.i < minImdb)) return false;
+        if (minRt > 0 && (record?.rt === undefined || record.rt < minRt)) return false;
+        return true;
+      })
+      .map(({ item, record }) => {
+        const scores = toCardScores(record);
+        return scores ? { ...item, scores } : item;
+      });
+  }, [query.data, enrichment.data, externalFilterActive, minImdb, minRt]);
 
   const switchType = (next: MediaType) => {
     setType(next);
@@ -47,6 +114,13 @@ export function DiscoverBar({ onActiveChange }: { onActiveChange?: (active: bool
 
   const toggleGenre = (id: number) => {
     setSelected((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
+  };
+
+  const resultsPending = query.isPending || (externalFilterActive && enrichment.isPending);
+  const resultsError = query.isError ? query.error : enrichment.isError ? enrichment.error : null;
+  const retry = () => {
+    void query.refetch();
+    if (externalFilterActive) void enrichment.refetch();
   };
 
   return (
@@ -77,16 +151,48 @@ export function DiscoverBar({ onActiveChange }: { onActiveChange?: (active: bool
         </div>
 
         <label className="flex items-center gap-2 text-sm">
-          <span className="text-ink-muted">Rated at least</span>
+          <span className="text-ink-muted">TMDB at least</span>
           <select
-            value={minRating}
-            onChange={(event) => setMinRating(Number(event.target.value))}
+            value={minTmdb}
+            onChange={(event) => setMinTmdb(Number(event.target.value))}
             className="h-9 rounded-lg border border-edge bg-surface px-2 text-ink text-sm transition-colors hover:border-marigold/60"
           >
             <option value={0}>Any</option>
-            {RATINGS.map((rating) => (
+            {MIN_RATINGS.map((rating) => (
               <option key={rating} value={rating}>
                 {rating}+
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-ink-muted">IMDb at least</span>
+          <select
+            value={minImdb}
+            onChange={(event) => setMinImdb(Number(event.target.value))}
+            className="h-9 rounded-lg border border-edge bg-surface px-2 text-ink text-sm transition-colors hover:border-marigold/60"
+          >
+            <option value={0}>Any</option>
+            {MIN_RATINGS.map((rating) => (
+              <option key={rating} value={rating}>
+                {rating}+
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-ink-muted">Rotten Tomatoes at least</span>
+          <select
+            value={minRt}
+            onChange={(event) => setMinRt(Number(event.target.value))}
+            className="h-9 rounded-lg border border-edge bg-surface px-2 text-ink text-sm transition-colors hover:border-marigold/60"
+          >
+            <option value={0}>Any</option>
+            {RT_THRESHOLDS.map((rating) => (
+              <option key={rating} value={rating}>
+                {rating}%+
               </option>
             ))}
           </select>
@@ -130,17 +236,17 @@ export function DiscoverBar({ onActiveChange }: { onActiveChange?: (active: bool
 
       {active && (
         <div className="mt-6 animate-fade-up">
-          {query.isPending ? (
+          {resultsPending ? (
             <PosterGridSkeleton count={20} />
-          ) : query.isError ? (
-            <QueryError error={query.error} onRetry={() => void query.refetch()} />
-          ) : query.data && query.data.items.length === 0 ? (
+          ) : resultsError ? (
+            <QueryError error={resultsError} onRetry={retry} />
+          ) : results && results.length === 0 ? (
             <Notice title="Nothing clears that bar.">
-              Drop the rating floor, or pick fewer genres at once — three genres at 8+ is a short
-              list for a reason.
+              Drop a rating floor, or pick fewer genres at once — stacking genres with a strict IMDb
+              or Rotten Tomatoes bar is a short list for a reason.
             </Notice>
-          ) : query.data ? (
-            <PosterGrid items={query.data.items} />
+          ) : results ? (
+            <PosterGrid items={results} />
           ) : null}
         </div>
       )}

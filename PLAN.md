@@ -340,7 +340,7 @@ Plain, specific, slightly dry. The interface talks about films the way a friend 
 
 ### 7.1 Scope
 
-- **Home** — a hero title, an inline "Build your own shortlist" discover bar (multi-genre + rating-floor filter over TMDB `/discover`, replacing the curated rails below it while a filter is active), then a handful of short curated rails with wry section titles rather than one rail per genre. Trimmed deliberately in the 2026-09-28 redesign — see `docs/DECISIONS.md` — on the theory that a home page proving depth by listing every genre once was the clutter, not the fix.
+- **Home** — a hero title, an inline "Build your own shortlist" discover bar (multi-genre filter over TMDB `/discover`, with independent TMDB, IMDb and Rotten Tomatoes rating floors, replacing the curated rails below it while a filter is active), then a handful of short curated rails with wry section titles rather than one rail per genre. Trimmed deliberately in the 2026-09-28 redesign — see `docs/DECISIONS.md` — on the theory that a home page proving depth by listing every genre once was the clutter, not the fix.
 - **Search** — a `⌘K` combobox in the header plus a full `/search` results page. Debounced at 300 ms, TMDB multi-search across movies and TV.
 - **Title detail** (`/movie/:id`, `/tv/:id`) — backdrop, poster, the scorecard, summary, runtime, release date, genres, original language, director and top-billed cast, trailer link, and a "More like this" rail from TMDB's recommendations endpoint.
 - **Browse by genre** (`/genre/:slug`) — grid with filters: minimum rating, year range, language, sort order. Filters live in the URL query string so a filtered view is a shareable link.

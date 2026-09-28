@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { CatalogRail } from './catalog-format';
 import { DATA_VERSION, fetchData } from './data';
 import type { MediaType } from './model';
-import { discoverTitles, getTitle, searchTitles } from './tmdb';
+import { discoverTitles, discoverTitlesPages, getTitle, searchTitles } from './tmdb';
 
 /**
  * Every TMDB query key starts with 'tmdb'. Only those are persisted to localStorage; catalogue
@@ -38,6 +38,19 @@ export function useDiscover(type: MediaType, params: Record<string, string | num
   return useQuery({
     queryKey: queryKeys.discover(type, params),
     queryFn: ({ signal }) => discoverTitles(type, params, signal),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** Like {@link useDiscover}, but concatenates `pageCount` pages for a bigger candidate pool. */
+export function useDiscoverPages(
+  type: MediaType,
+  params: Record<string, string | number>,
+  pageCount: number,
+) {
+  return useQuery({
+    queryKey: [...queryKeys.discover(type, params), 'pages', pageCount] as const,
+    queryFn: ({ signal }) => discoverTitlesPages(type, params, pageCount, signal),
     placeholderData: keepPreviousData,
   });
 }

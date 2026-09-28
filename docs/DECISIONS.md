@@ -105,3 +105,35 @@ six and given a dry, specific voice ("Everyone's already seen this", "The ones e
 they've seen") instead of literal labels, on the theory that a section name is copy, not a
 data label.
 
+## 2026-09-28 · IMDb and Rotten Tomatoes floors on the discover bar
+
+**The discover bar's rating floor only ever filtered on TMDB's own score, because that's the only
+score TMDB's `/discover` endpoint knows about.** IMDb and Rotten Tomatoes numbers live in our own
+nightly-built ratings shards (§2.2), keyed by IMDb ID, and a live TMDB discover result carries no
+IMDb ID — that only comes back from a title's detail endpoint. Filtering by IMDb or RT therefore
+can't happen at the TMDB API call; it has to happen client-side, after resolving each candidate's
+IMDb ID and looking it up in the shard that OMDb's own numbers already live in.
+
+**The fix cross-references live discover results against the ratings shards instead of building a
+second data pipeline.** For each candidate TMDB returns, `getImdbId()` (`src/lib/tmdb.ts`) resolves
+its `external_ids`, and `fetchRatingsByImdbIds()` (`src/lib/ratings.ts`) resolves the shard lookups,
+deduplicated per shard so twenty titles sharing a shard cost one fetch, not twenty. This keeps
+IMDb/RT filtering live and comprehensive (any TMDB genre combination, not just what a nightly job
+happened to pre-enrich) at the cost of one extra small request per visible candidate — acceptable
+because TMDB has no daily cap, unlike OMDb.
+
+**Filtering is strictly narrowing, so a floor pulls in a second discover page.** Once a IMDb or RT
+floor is active, `useDiscoverPages()` fetches two TMDB pages instead of one before the client-side
+filter runs, because cross-referencing can only shrink the 20-title pool TMDB hands back, never
+grow it back to a full page. Twenty was found to be too few candidates to clear a strict floor like
+IMDb 8+ and RT 90%+ stacked together and still show a shelf worth looking at.
+
+**Fetching ratings and applying the threshold are two different steps, deliberately.** The IMDb/RT
+lookup is one `useQuery`, keyed only on the candidate IDs; the threshold filter is a plain
+`useMemo` over its result. Moving the rating floor from 7 to 8 re-filters already-fetched data
+instantly — no network call — because the expensive part (resolving external IDs and shard data)
+doesn't depend on where the bar is set, only on which titles are being considered. The two floors
+were nearly merged into one query keyed on the thresholds too; that would have re-run the external
+ID lookups on every dropdown change for no reason, so they were split.
+
+
