@@ -35,7 +35,7 @@ export function Footer() {
           IMDb, Rotten Tomatoes and Metacritic scores come from the{' '}
           <a
             href="https://www.omdbapi.com/"
-            className="underline underline-offset-2 hover:text-ink"
+            className="underline underline-offset-2 transition-colors hover:text-marigold"
           >
             OMDb API
           </a>{' '}

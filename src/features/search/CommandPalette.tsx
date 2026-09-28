@@ -16,7 +16,7 @@ import { CheckIcon, SearchIcon } from '../../ui/icons';
 import { typeLabel } from '../../ui/PosterCard';
 
 const ITEM =
-  'flex cursor-pointer items-center gap-3 rounded-sm px-2 py-2 text-sm text-ink data-[selected=true]:bg-edge';
+  'flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm text-ink transition-colors duration-150 data-[selected=true]:bg-marigold/15';
 const GROUP =
   'mb-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-ink-muted [&_[cmdk-group-heading]]:text-xs';
 

@@ -7,6 +7,33 @@ async function fetchShard(key: string, signal?: AbortSignal): Promise<RatingShar
   return (await fetchData<RatingShard>(`ratings/${key}.json`, signal)) ?? {};
 }
 
+/**
+ * Resolves ratings for a batch of IMDb IDs, fetching each distinct shard at most once. Used to
+ * cross-reference a page of live TMDB results against IMDb/RT scores without a per-title round
+ * trip to a separate endpoint — the shard is the only place those scores live.
+ */
+export async function fetchRatingsByImdbIds(
+  imdbIds: ReadonlyArray<string | null>,
+  signal?: AbortSignal,
+): Promise<Map<string, RatingRecord>> {
+  const shardKeys = new Set<string>();
+  for (const id of imdbIds) {
+    if (isImdbId(id)) shardKeys.add(shardKey(id));
+  }
+  const shards = new Map(
+    await Promise.all(
+      Array.from(shardKeys, async (key) => [key, await fetchShard(key, signal)] as const),
+    ),
+  );
+  const result = new Map<string, RatingRecord>();
+  for (const id of imdbIds) {
+    if (!isImdbId(id)) continue;
+    const record = shards.get(shardKey(id))?.[id];
+    if (record) result.set(id, record);
+  }
+  return result;
+}
+
 export type RatingsState =
   | { status: 'none' }
   | { status: 'pending' }

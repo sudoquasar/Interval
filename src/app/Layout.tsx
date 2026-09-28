@@ -30,7 +30,7 @@ export function Layout() {
     <div className="flex min-h-dvh flex-col">
       <a
         href="#main"
-        className="sr-only z-50 bg-marigold px-4 py-2 font-medium text-ground focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        className="sr-only z-50 bg-marigold px-4 py-2 font-medium text-on-accent focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
       >
         Skip to content
       </a>

@@ -1,6 +1,8 @@
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { NotFound } from '../../app/NotFound';
+import { accentHoverClass } from '../../lib/accents';
+import { cx } from '../../lib/cx';
 import { formatDate, formatRuntime, languageName, titleStretch } from '../../lib/format';
 import { genreForId } from '../../lib/genres';
 import { useDocumentTitle } from '../../lib/hooks';
@@ -40,18 +42,21 @@ function BackLink() {
   const location = useLocation();
   const navigate = useNavigate();
   const className =
-    'inline-flex items-center gap-2 text-ink-muted text-sm hover:text-ink focus-visible:text-ink';
+    'group inline-flex items-center gap-2 text-ink-muted text-sm transition-colors hover:text-marigold focus-visible:text-marigold';
+  const arrow = (
+    <ArrowLeftIcon className="size-4 transition-transform duration-200 ease-snappy group-hover:-translate-x-1" />
+  );
   if (location.key !== 'default') {
     return (
       <button type="button" onClick={() => navigate(-1)} className={className}>
-        <ArrowLeftIcon className="size-4" />
+        {arrow}
         Back
       </button>
     );
   }
   return (
     <Link to="/" className={className}>
-      <ArrowLeftIcon className="size-4" />
+      {arrow}
       Home
     </Link>
   );
@@ -112,7 +117,7 @@ function TitleContent({ detail }: { detail: TitleDetail }) {
             </div>
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 animate-fade-up">
             <p className="text-ink-muted text-sm">{typeLabel(detail)}</p>
             <h1
               className="mt-1 font-display font-semibold text-2xl sm:text-3xl"
@@ -183,23 +188,31 @@ function TitleContent({ detail }: { detail: TitleDetail }) {
               )}
               {detail.genreList.length > 0 && (
                 <Fact label="Genres">
-                  {detail.genreList.map((g, index) => {
-                    const genre = genreForId(g.id, detail.type);
-                    const separator = index < detail.genreList.length - 1 ? ', ' : '';
-                    if (!genre) return <span key={g.id}>{`${g.name}${separator}`}</span>;
-                    const search = detail.type === 'tv' && genre.movie !== null ? '?type=tv' : '';
-                    return (
-                      <span key={g.id}>
+                  <span className="flex flex-wrap gap-1.5">
+                    {detail.genreList.map((g, index) => {
+                      const genre = genreForId(g.id, detail.type);
+                      if (!genre) {
+                        return (
+                          <span key={g.id} className="text-ink-muted text-xs">
+                            {g.name}
+                          </span>
+                        );
+                      }
+                      const search = detail.type === 'tv' && genre.movie !== null ? '?type=tv' : '';
+                      return (
                         <Link
+                          key={g.id}
                           to={`/genre/${genre.slug}${search}`}
-                          className="underline decoration-edge underline-offset-4 hover:decoration-ink"
+                          className={cx(
+                            'rounded-full border border-edge px-2.5 py-0.5 text-xs transition-all duration-200 ease-snappy hover:scale-105',
+                            accentHoverClass(index),
+                          )}
                         >
                           {g.name}
                         </Link>
-                        {separator}
-                      </span>
-                    );
-                  })}
+                      );
+                    })}
+                  </span>
                 </Fact>
               )}
               {language && <Fact label="Original language">{language}</Fact>}
@@ -219,7 +232,7 @@ function TitleContent({ detail }: { detail: TitleDetail }) {
                   {detail.cast.map((member) => (
                     <li
                       key={member.id}
-                      className="flex items-baseline justify-between gap-4 border-edge border-b py-2"
+                      className="flex items-baseline justify-between gap-4 rounded-md border-edge border-b px-2 py-2 transition-colors duration-200 hover:bg-surface-high"
                     >
                       <span>{member.name}</span>
                       <span className="truncate text-right text-ink-muted">{member.character}</span>
@@ -245,12 +258,12 @@ function TitleSkeleton() {
       <div className="h-5" />
       <div className={`mt-6 ${COLUMNS}`}>
         <div className={POSTER_COLUMN}>
-          <div className="aspect-[2/3] rounded-sm bg-surface" />
+          <div className="aspect-[2/3] animate-shimmer rounded-sm bg-surface" />
         </div>
         <div>
-          <div className="h-5 w-16 bg-surface" />
-          <div className="mt-2 h-12 w-3/4 bg-surface sm:h-16" />
-          <div className="mt-4 h-5 w-48 bg-surface" />
+          <div className="h-5 w-16 animate-shimmer bg-surface" />
+          <div className="mt-2 h-12 w-3/4 animate-shimmer bg-surface sm:h-16" />
+          <div className="mt-4 h-5 w-48 animate-shimmer bg-surface" />
         </div>
       </div>
     </div>

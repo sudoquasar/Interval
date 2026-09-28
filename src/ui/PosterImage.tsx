@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cx } from '../lib/cx';
 import { titleStretch } from '../lib/format';
 import { tmdbImage } from '../lib/images';
 
@@ -9,6 +10,8 @@ interface PosterImageProps {
   sizes: string;
   variant?: 'card' | 'detail';
   priority?: boolean;
+  /** Extra classes for the `<img>` itself, e.g. a hover-zoom transform on the card variant. */
+  imgClassName?: string;
 }
 
 export function posterAlt(title: string, year: number | null): string {
@@ -26,6 +29,7 @@ export function PosterImage({
   sizes,
   variant = 'card',
   priority = false,
+  imgClassName,
 }: PosterImageProps) {
   const [failed, setFailed] = useState(false);
   const alt = posterAlt(title, year);
@@ -62,7 +66,7 @@ export function PosterImage({
       fetchPriority={priority ? 'high' : undefined}
       decoding="async"
       onError={() => setFailed(true)}
-      className="absolute inset-0 h-full w-full object-cover"
+      className={cx('absolute inset-0 h-full w-full object-cover', imgClassName)}
     />
   );
 }

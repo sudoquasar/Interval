@@ -8,7 +8,7 @@
       name="description"
       content="Films and series worth watching tonight, with IMDb, Rotten Tomatoes and TMDB scores side by side."
     />
-    <meta name="theme-color" content="#1C1420" />
+    <meta name="theme-color" content="#FFF7EC" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Interval" />
     <meta
@@ -18,6 +18,13 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://image.tmdb.org" />
     <link rel="preconnect" href="https://api.themoviedb.org" crossorigin />
+    <script>
+      // Keep in sync with src/store/theme.ts. Runs before first paint so a returning
+      // dark-mode visitor never sees a flash of the light theme.
+      if (localStorage.getItem('interval-theme') === 'dark') {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { type Saveable, useIsSaved, useWatchlist } from '../../store/watchlist';
-import { Button, type ButtonVariant, buttonClass } from '../../ui/Button';
+import { Button, type ButtonVariant } from '../../ui/Button';
 import { CheckIcon, PlusIcon } from '../../ui/icons';
 
 /**
@@ -29,7 +29,10 @@ export function WatchlistButton({
 
   return (
     <span className="inline-flex items-center gap-4">
-      <Link to="/watchlist" className={buttonClass('secondary')}>
+      <Link
+        to="/watchlist"
+        className="inline-flex h-10 animate-pop items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-verdigris/50 px-4 font-medium text-sm text-verdigris transition-all duration-200 ease-snappy hover:border-verdigris hover:bg-verdigris/10 active:scale-[0.97]"
+      >
         <CheckIcon className="size-4" />
         On your watchlist
       </Link>

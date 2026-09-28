@@ -8,6 +8,7 @@ import {
   tvDetailToModel,
 } from './model';
 import type {
+  TmdbExternalIds,
   TmdbMovieDetail,
   TmdbMultiResult,
   TmdbPage,
@@ -169,4 +170,41 @@ export async function discoverTitles(
     totalPages: Math.min(raw.total_pages, TMDB_MAX_PAGE),
     totalResults: raw.total_results,
   };
+}
+
+/**
+ * Concatenates consecutive discover pages into one result. Used when a filter needs a bigger
+ * candidate pool than one page gives — cross-referencing against IMDb/RT can only narrow the set,
+ * never widen it, so a client-side filter needs more raw candidates than it means to show.
+ */
+export async function discoverTitlesPages(
+  type: MediaType,
+  params: Params,
+  pageCount: number,
+  signal?: AbortSignal,
+): Promise<DiscoverResults> {
+  const startPage = Number(params.page) || 1;
+  const pages = await Promise.all(
+    Array.from({ length: pageCount }, (_, i) =>
+      discoverTitles(type, { ...params, page: startPage + i }, signal),
+    ),
+  );
+  const first = pages[0];
+  if (!first) throw new Error('discoverTitlesPages requires pageCount >= 1');
+  return {
+    items: pages.flatMap((p) => p.items),
+    page: first.page,
+    totalPages: first.totalPages,
+    totalResults: first.totalResults,
+  };
+}
+
+/** IMDb ID for a title, resolved live — discover/search results don't carry it, only detail does. */
+export async function getImdbId(
+  type: MediaType,
+  id: number,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  const raw = await tmdbGet<TmdbExternalIds>(`/${type}/${id}/external_ids`, {}, signal);
+  return raw.imdb_id ?? null;
 }

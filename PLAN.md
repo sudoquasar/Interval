@@ -253,28 +253,36 @@ interval/
 
 ### 6.1 The idea
 
-**The posters are the content. Everything else gets out of their way.**
+**The posters are still the content. The chrome now has a pulse — and a light switch.**
 
-A movie grid is already the most visually loud thing on any page — twenty pieces of professional poster art, each competing for attention. Almost every film site fights this by adding more: gradients behind cards, glows on hover, coloured badges. The result is noise. Interval goes the other direction: the interface chrome is desaturated, matte, and quiet, and the only saturated colour in the entire UI is the single accent used for scores and actions. The posters supply the colour.
+Phase 1 shipped a matte, single-accent dark interface on the theory that a movie grid is already loud enough on its own. In practice "quiet" read as inert: real interactivity and a small family of colour make the same grid feel current without drowning the poster art. The rule did not become "add more" — it became "add on purpose." Every new colour has exactly one job (§6.2), every new motion happens only in response to the user (hover, focus, arrival, a value changing), and the poster is still never cropped, filtered or covered by a gradient. See `docs/DECISIONS.md`, 2026-09-28, for why this changed and what it superseded.
 
-The reference point is not Netflix, it is a **cinema listings sheet** — the printed programme outside a single-screen theatre. Dense, typographic, information-first, with the title set large because the title is the point.
+A second pass the same day replaced the single dark theme with two: a bright, high-contrast light theme as the default (most people land on this site in daylight, on a phone, and a near-black page is the wrong first impression), with the original dark palette preserved as a toggle-able alternative rather than discarded. Both themes carry the same five-accent system and the same 4.5:1 contrast floor independently — switching theme never trades accessibility for mood.
+
+The reference point moved from a cinema listings sheet to the same listings sheet under working house lights — still dense and typographic, but no longer pretending the room is empty.
 
 ### 6.2 Tokens
 
-**Colour** — a deep aubergine ground rather than the default near-black, because near-black plus one acid accent is the house style of every AI-generated dark UI. Aubergine reads as a dark room without reading as a terminal.
+**Colour** — light is the default ground, a warm paper tone rather than clinical white (near-white plus one acid accent is the house style of every AI-generated light UI just as much as the dark version was; warm paper reads as a printed sheet without reading as a form). Dark mode keeps the original deep-aubergine palette from the first redesign pass, reachable via the toggle in the header (`src/store/theme.ts`, `useTheme`), persisted to `localStorage`, and applied before first paint by an inline script in `index.html` so there is no flash of the wrong theme. The accent family stays a curated set of five, each doing exactly one job so variety stays systemic rather than decorative — every accent has an independently-tuned hex per theme so both directions of contrast (text-on-background and background-with-contrasting-text) clear 4.5:1 in both themes.
 
 ```
---ground      #1C1420   page background, matte
---surface     #281C2E   cards, sheets, raised areas
---edge        #3C2D43   hairlines and dividers
---ink         #F2EDE4   primary text, warm off-white (never pure white)
---ink-muted   #A0919E   secondary text, metadata
---marigold    #E8A33D   THE accent — scores, focus rings, primary actions
---verdigris   #2E7D6F   the one secondary, used only for "available to you"
---rot         #C0503C   low Tomatometer, destructive actions
+                    LIGHT (default)   DARK (toggle)
+--ground            #FFF7EC           #1C1420   page background
+--surface           #FFFFFF           #281C2E   cards, sheets, raised areas
+--surface-high      #FDEEDA           #33243B   hover/raised state for surface elements
+--edge              #E7DAC5           #3C2D43   hairlines and dividers
+--ink               #23182B           #F2EDE4   primary text
+--ink-muted         #6E5F68           #A0919E   secondary text, metadata
+--marigold          #9F6604           #E8A33D   primary actions, focus rings — not score colour (that's tier-based, below)
+--verdigris         #0A7F62           #33B39B   "great" score tier, "available to you"
+--coral             #DE1248           #F2577C   delight — watchlist saved state, trending/new badges
+--violet            #7D30E8           #A672E0   categorisation — genre chips (cycled with the others below)
+--azure             #0F77B8           #4FADE8   information — alternate badge/chip colour
+--rot               #D83218           #E2583F   "low" score tier, destructive actions
+--on-accent         #FFF7EC           #1C1420   text drawn on top of a solid accent fill
 ```
 
-Marigold appears perhaps six times on a page. If it appears twenty, something has gone wrong.
+Each accent still has one job. The test changed from "count marigold on the page" to "could you say, for any coloured pixel, which job it's doing" — if not, it should not be there. Tokens are CSS custom properties on `:root`, overridden wholesale under `:root[data-theme='dark']`, so a theme switch is a single attribute flip with no re-render — components read `var(--color-*)` and never branch on theme in JS. `tierGlow()` (`src/lib/scoreTier.ts`) and every hardcoded shadow colour use `color-mix(in oklab, var(--color-x) N%, transparent)` rather than a literal RGBA, so glows and shadows stay correct in both themes automatically.
 
 **Type** — two families, clearly distinct, both free and self-hosted via Fontsource so there is no Google Fonts request on every page load.
 
@@ -309,12 +317,14 @@ Left-aligned throughout. No centred body text. The poster on the detail page is 
 
 **The scorecard** is the one component that earns custom design. Three sources — IMDb, Rotten Tomatoes, Metacritic — shown as a single horizontal unit with hairline dividers, not three separate pills. Numbers set in the display face at 21px. A missing score renders as an em dash in the same slot, so the unit never changes width and the grid never reflows.
 
-### 6.3 Rules
+### 6.3 Rules (revised 2026-09-28 — see docs/DECISIONS.md)
 
-- **Motion**: one orchestrated moment on first paint (the hero backdrop resolves from a low-quality TMDB thumbnail to full size). Nothing else animates unless the user caused it. No card hover lifts, no staggered fade-ups on scroll — those are the tell.
-- **Cards**: the poster *is* the card. `border-radius: 2px`, matching a real printed poster's corner, not 12px. Rating sits on the poster's lower edge in a translucent strip, not in a box below it. No shadows.
-- **Empty and error states**: written as directions, not apologies. "No results for *tenet*. Try the Hindi title, or search by director." Never "Oops! Something went wrong."
-- **Quality floor, not announced**: responsive to 360px, visible keyboard focus in marigold, `prefers-reduced-motion` respected, 4.5:1 contrast minimum, every poster has a real alt text built from title and year.
+- **Motion**: welcome wherever the user caused it — hover, focus, arrival, a value changing. A poster lifts and glows in its score's tier colour on hover; scores count up when they arrive; rails and grids enter with a brief staggered rise; the hero backdrop still resolves from a low-quality thumbnail and now drifts in a slow Ken Burns zoom. The line that still holds: nothing animates *before* the user does something, or forever — entrances play once, loops don't run unattended, and `prefers-reduced-motion` collapses every duration to near-zero (already global, `src/index.css`).
+- **Cards**: the poster is still the card, never cropped or covered. `border-radius: 2px` is reserved for posters and imagery specifically — a printed poster's corner, not 12px — while interactive chrome (buttons, dialogs, inputs, chips) uses a softer radius on purpose, so content and touch targets read as two different materials. A hover shows a soft glow in the card's own score-tier colour; the rating strip on the poster's lower edge still never causes reflow.
+- **Colour**: five accents, one job each (§6.2), tuned independently for light and dark so both clear the contrast floor. A colour is allowed wherever it identifies something specific — a score tier, a genre chip, a saved state — never as decoration with no referent.
+- **Theme**: light is the default; dark is one click away via the header toggle and remembered per browser. Nothing in either theme is theme-only content — the two are a palette swap over the same layout, never a different feature set.
+- **Empty and error states**: written as directions, not apologies. "No results for *tenet*. Try the Hindi title, or search by director." Never "Oops! Something went wrong." They may now carry a small accent mark and a brief entrance; the copy voice does not change.
+- **Quality floor, not announced**: responsive to 360px, visible keyboard focus in marigold, `prefers-reduced-motion` respected, 4.5:1 contrast minimum for text, every poster has a real alt text built from title and year.
 
 ### 6.4 Copy voice
 
@@ -330,7 +340,7 @@ Plain, specific, slightly dry. The interface talks about films the way a friend 
 
 ### 7.1 Scope
 
-- **Home** — a hero title, then horizontal rails: Trending this week, Popular in India, Top rated of all time, New this month, and one rail per major genre.
+- **Home** — a hero title, an inline "Build your own shortlist" discover bar (multi-genre filter over TMDB `/discover`, with independent TMDB, IMDb and Rotten Tomatoes rating floors, replacing the curated rails below it while a filter is active), then a handful of short curated rails with wry section titles rather than one rail per genre. Trimmed deliberately in the 2026-09-28 redesign — see `docs/DECISIONS.md` — on the theory that a home page proving depth by listing every genre once was the clutter, not the fix.
 - **Search** — a `⌘K` combobox in the header plus a full `/search` results page. Debounced at 300 ms, TMDB multi-search across movies and TV.
 - **Title detail** (`/movie/:id`, `/tv/:id`) — backdrop, poster, the scorecard, summary, runtime, release date, genres, original language, director and top-billed cast, trailer link, and a "More like this" rail from TMDB's recommendations endpoint.
 - **Browse by genre** (`/genre/:slug`) — grid with filters: minimum rating, year range, language, sort order. Filters live in the URL query string so a filtered view is a shareable link.
@@ -409,7 +419,9 @@ Mitigations, in order of when they apply: keep the OMDb key out of the bundle fr
 
 ### 7.7 Not now
 
-Trailers embedded inline (heavy iframe, YouTube tracking, link out instead) · infinite scroll (paginate; infinite scroll wrecks the back button and burns API quota) · dark/light toggle (the design is dark by intent; a light variant is a second design system to maintain) · user accounts of any kind · SSR or prerendering for SEO.
+Trailers embedded inline (heavy iframe, YouTube tracking, link out instead) · infinite scroll (paginate; infinite scroll wrecks the back button and burns API quota) · user accounts of any kind · SSR or prerendering for SEO.
+
+*(The light/dark toggle originally listed here as out of scope shipped in the 2026-09-28 redesign — see §6.1 and `docs/DECISIONS.md`. Both themes share one design system, not two, which is what made it cheap enough to add.)*
 
 ### 7.8 Done when
 
@@ -887,7 +899,6 @@ export const app = {
   tagline: 'What to watch, and where',
   defaultRegion: 'IN',
   regions: ['IN', 'US', 'GB', 'AE'],
-  genreRails: [28, 35, 18, 27, 878, 10749],      // order of the home rails
   minVoteCount: 200,                              // rating credibility floor
   ratingsCacheTtlMinutes: 60,
   priceStaleAfterDays: 120,                       // hide prices older than this
@@ -904,12 +915,13 @@ Kept deliberately short. Every setting is a thing you then have to support.
 | Setting | Where it lives | From |
 |---|---|---|
 | Region | localStorage → profile | P2 → P4 |
+| Theme (light/dark) | localStorage, header toggle | 1 (added 2026-09-28) |
 | Services I subscribe to | localStorage → profile | P2 → P4 |
 | Watchlist | localStorage → account | P1 → P4 |
 | Display name and avatar | Profile | P4 |
 | Default list for "add" | Profile | P4 |
 
-No theme toggle, no language toggle, no notification preferences, no density setting.
+No language toggle, no notification preferences, no density setting.
 
 ---
 
