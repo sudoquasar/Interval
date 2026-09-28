@@ -73,7 +73,7 @@ function YearInput({
         onKeyDown={(event) => {
           if (event.key === 'Enter') commit();
         }}
-        className="h-9 w-20 rounded-sm border border-edge bg-surface px-2 text-sm tabular-nums placeholder:text-ink-muted hover:border-ink-muted"
+        className="h-9 w-20 rounded-lg border border-edge bg-surface px-2 text-sm tabular-nums placeholder:text-ink-muted transition-colors hover:border-marigold/60"
       />
     </div>
   );
@@ -93,11 +93,11 @@ function TypeToggle({
   return (
     <fieldset className="flex flex-col gap-1">
       <legend className="mb-1 text-ink-muted text-xs">Showing</legend>
-      <div className="flex h-9 rounded-sm border border-edge">
+      <div className="flex h-9 rounded-lg border border-edge">
         {options.map((type) => (
           <label
             key={type}
-            className="flex cursor-pointer items-center px-3 text-ink-muted text-sm hover:text-ink has-[:checked]:bg-edge has-[:checked]:text-ink has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-marigold"
+            className="flex cursor-pointer items-center px-3 text-ink-muted text-sm transition-colors duration-200 hover:text-ink has-[:checked]:bg-marigold has-[:checked]:text-ground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-marigold"
           >
             <input
               type="radio"

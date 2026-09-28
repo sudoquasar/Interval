@@ -253,28 +253,32 @@ interval/
 
 ### 6.1 The idea
 
-**The posters are the content. Everything else gets out of their way.**
+**The posters are still the content. The chrome now has a pulse.**
 
-A movie grid is already the most visually loud thing on any page — twenty pieces of professional poster art, each competing for attention. Almost every film site fights this by adding more: gradients behind cards, glows on hover, coloured badges. The result is noise. Interval goes the other direction: the interface chrome is desaturated, matte, and quiet, and the only saturated colour in the entire UI is the single accent used for scores and actions. The posters supply the colour.
+Phase 1 shipped a matte, single-accent interface on the theory that a movie grid is already loud enough on its own. In practice "quiet" read as inert: real interactivity and a small family of colour make the same grid feel current without drowning the poster art. The rule did not become "add more" — it became "add on purpose." Every new colour has exactly one job (§6.2), every new motion happens only in response to the user (hover, focus, arrival, a value changing), and the poster is still never cropped, filtered or covered by a gradient. See `docs/DECISIONS.md`, 2026-09-28, for why this changed and what it superseded.
 
-The reference point is not Netflix, it is a **cinema listings sheet** — the printed programme outside a single-screen theatre. Dense, typographic, information-first, with the title set large because the title is the point.
+The reference point moved from a cinema listings sheet to the same listings sheet under working house lights — still dense and typographic, but no longer pretending the room is empty.
 
 ### 6.2 Tokens
 
-**Colour** — a deep aubergine ground rather than the default near-black, because near-black plus one acid accent is the house style of every AI-generated dark UI. Aubergine reads as a dark room without reading as a terminal.
+**Colour** — the same deep aubergine ground (near-black plus one acid accent is the house style of every AI-generated dark UI; aubergine reads as a dark room without reading as a terminal), but the accent family grew from one gold to a curated set of five, each doing exactly one job so variety stays systemic rather than decorative.
 
 ```
---ground      #1C1420   page background, matte
---surface     #281C2E   cards, sheets, raised areas
---edge        #3C2D43   hairlines and dividers
---ink         #F2EDE4   primary text, warm off-white (never pure white)
---ink-muted   #A0919E   secondary text, metadata
---marigold    #E8A33D   THE accent — scores, focus rings, primary actions
---verdigris   #2E7D6F   the one secondary, used only for "available to you"
---rot         #C0503C   low Tomatometer, destructive actions
+--ground        #1C1420   page background, matte
+--surface       #281C2E   cards, sheets, raised areas
+--surface-high  #33243B   hover/raised state for surface elements
+--edge          #3C2D43   hairlines and dividers
+--ink           #F2EDE4   primary text, warm off-white (never pure white)
+--ink-muted     #A0919E   secondary text, metadata
+--marigold      #E8A33D   primary actions, focus rings — not score colour (that's tier-based, below)
+--verdigris     #33B39B   "great" score tier, "available to you"
+--coral         #F2577C   delight — watchlist saved state, trending/new badges
+--violet        #A672E0   categorisation — genre chips (cycled with the others below)
+--azure         #4FADE8   information — alternate badge/chip colour
+--rot           #E2583F   "low" score tier, destructive actions
 ```
 
-Marigold appears perhaps six times on a page. If it appears twenty, something has gone wrong.
+Each accent still has one job. The test changed from "count marigold on the page" to "could you say, for any coloured pixel, which job it's doing" — if not, it should not be there.
 
 **Type** — two families, clearly distinct, both free and self-hosted via Fontsource so there is no Google Fonts request on every page load.
 
@@ -309,12 +313,13 @@ Left-aligned throughout. No centred body text. The poster on the detail page is 
 
 **The scorecard** is the one component that earns custom design. Three sources — IMDb, Rotten Tomatoes, Metacritic — shown as a single horizontal unit with hairline dividers, not three separate pills. Numbers set in the display face at 21px. A missing score renders as an em dash in the same slot, so the unit never changes width and the grid never reflows.
 
-### 6.3 Rules
+### 6.3 Rules (revised 2026-09-28 — see docs/DECISIONS.md)
 
-- **Motion**: one orchestrated moment on first paint (the hero backdrop resolves from a low-quality TMDB thumbnail to full size). Nothing else animates unless the user caused it. No card hover lifts, no staggered fade-ups on scroll — those are the tell.
-- **Cards**: the poster *is* the card. `border-radius: 2px`, matching a real printed poster's corner, not 12px. Rating sits on the poster's lower edge in a translucent strip, not in a box below it. No shadows.
-- **Empty and error states**: written as directions, not apologies. "No results for *tenet*. Try the Hindi title, or search by director." Never "Oops! Something went wrong."
-- **Quality floor, not announced**: responsive to 360px, visible keyboard focus in marigold, `prefers-reduced-motion` respected, 4.5:1 contrast minimum, every poster has a real alt text built from title and year.
+- **Motion**: welcome wherever the user caused it — hover, focus, arrival, a value changing. A poster lifts and glows in its score's tier colour on hover; scores count up when they arrive; rails and grids enter with a brief staggered rise; the hero backdrop still resolves from a low-quality thumbnail and now drifts in a slow Ken Burns zoom. The line that still holds: nothing animates *before* the user does something, or forever — entrances play once, loops don't run unattended, and `prefers-reduced-motion` collapses every duration to near-zero (already global, `src/index.css`).
+- **Cards**: the poster is still the card, never cropped or covered. `border-radius: 2px` is reserved for posters and imagery specifically — a printed poster's corner, not 12px — while interactive chrome (buttons, dialogs, inputs, chips) uses a softer radius on purpose, so content and touch targets read as two different materials. A hover shows a soft glow in the card's own score-tier colour; the rating strip on the poster's lower edge still never causes reflow.
+- **Colour**: five accents, one job each (§6.2). A colour is allowed wherever it identifies something specific — a score tier, a genre chip, a saved state — never as decoration with no referent.
+- **Empty and error states**: written as directions, not apologies. "No results for *tenet*. Try the Hindi title, or search by director." Never "Oops! Something went wrong." They may now carry a small accent mark and a brief entrance; the copy voice does not change.
+- **Quality floor, not announced**: responsive to 360px, visible keyboard focus in marigold, `prefers-reduced-motion` respected, 4.5:1 contrast minimum for text, every poster has a real alt text built from title and year.
 
 ### 6.4 Copy voice
 

@@ -47,3 +47,27 @@ Tomatometer marker.
 **Watchlist control.** "Add to watchlist" adds. Once saved, the control becomes a link,
 "On your watchlist", plus a separate "Remove", so no button's label ever describes a state
 instead of an action.
+
+## 2026-09-28 · Lively minimalist redesign
+
+**Motion and colour rules loosened deliberately, not by drift.** PLAN.md §6.3 originally banned
+hover lifts, card glows and anything beyond one orchestrated moment; the brief changed to "more
+alive, still decluttered." This entry records the trade explicitly so a future reader does not
+mistake the old rule for still binding. PLAN.md §6 is rewritten to match.
+
+**Card scores now colour by tier, superseding "Card scores are ink, not marigold."** Each score
+gets one of three tier colours (verdigris/marigold/rot for great/good/low) via
+`src/lib/scoreTier.ts`, reused for the Tomatometer dot and every poster-card rating, so the same
+number means the same colour everywhere it appears.
+
+**Skeletons shimmer, superseding "Skeletons do not pulse."** A loading block now sweeps with
+`animate-shimmer` once `prefers-reduced-motion` allows it, rather than sitting flat and static.
+
+**A curated accent family, not one gold.** Coral, violet and azure joined marigold and verdigris
+(rot unchanged) for genre chips, badges and hover glows — five hues, each with exactly one job
+(`src/index.css`'s `@theme` block), so variety stays systemic instead of decorative.
+
+**Poster corners stay sharp; interactive chrome does not.** `radius-sm` (2px) is now reserved for
+posters and imagery only. Buttons, dialogs, chips and form controls moved to Tailwind's default
+`md`/`lg`/`full` radii, so content and touch targets read as two deliberately different materials.
+

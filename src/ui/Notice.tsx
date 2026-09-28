@@ -17,8 +17,9 @@ export function Notice({
   className?: string;
 }) {
   return (
-    <div className={cx('measure py-12', className)}>
-      <p className="font-display text-xl">{title}</p>
+    <div className={cx('measure animate-fade-up py-12', className)}>
+      <div aria-hidden="true" className="h-1 w-10 rounded-full bg-marigold" />
+      <p className="mt-4 font-display text-xl">{title}</p>
       {children && <div className="mt-2 text-ink-muted">{children}</div>}
       {action && <div className="mt-6 flex flex-wrap gap-3">{action}</div>}
     </div>

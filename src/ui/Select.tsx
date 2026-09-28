@@ -15,7 +15,7 @@ export function Select({ label, className, children, ...props }: SelectProps) {
       <select
         id={id}
         className={cx(
-          'h-9 rounded-sm border border-edge bg-surface px-2 text-ink text-sm hover:border-ink-muted',
+          'h-9 rounded-lg border border-edge bg-surface px-2 text-ink text-sm transition-colors duration-200 hover:border-marigold/60',
           className,
         )}
         {...props}

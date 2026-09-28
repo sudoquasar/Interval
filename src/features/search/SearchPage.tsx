@@ -100,7 +100,7 @@ export default function SearchPage() {
         <label htmlFor="search-input" className="sr-only">
           Search films and series
         </label>
-        <div className="flex h-12 items-center gap-3 rounded-sm border border-edge bg-surface px-4 focus-within:border-ink-muted">
+        <div className="flex h-12 items-center gap-3 rounded-lg border border-edge bg-surface px-4 transition-all duration-200 focus-within:border-marigold focus-within:shadow-[0_0_0_4px_rgb(232_163_61_/_18%)]">
           <SearchIcon className="size-5 shrink-0 text-ink-muted" />
           <input
             id="search-input"

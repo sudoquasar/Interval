@@ -1,6 +1,8 @@
 import { Link } from 'react-router';
 import { app } from '../../../config/app.config';
+import { accentHoverClass } from '../../lib/accents';
 import { genreRailId, popularRailId, RAIL } from '../../lib/catalog-format';
+import { cx } from '../../lib/cx';
 import { regionName } from '../../lib/format';
 import { GENRES, genreForId } from '../../lib/genres';
 import { useDocumentTitle } from '../../lib/hooks';
@@ -35,14 +37,20 @@ function CatalogRail({
 
 function GenreIndex() {
   return (
-    <section aria-labelledby="genre-index" className="mt-16 px-4 sm:px-8">
+    <section aria-labelledby="genre-index" className="mt-20 px-4 sm:px-8">
       <h2 id="genre-index" className="font-display font-semibold text-lg">
         Browse by genre
       </h2>
-      <ul className="mt-4 columns-2 gap-8 text-sm sm:columns-3 lg:columns-5">
-        {GENRES.map((genre) => (
-          <li key={genre.slug} className="break-inside-avoid py-1.5">
-            <Link to={`/genre/${genre.slug}`} className="text-ink-muted hover:text-ink">
+      <ul className="mt-5 flex flex-wrap gap-2.5">
+        {GENRES.map((genre, index) => (
+          <li key={genre.slug}>
+            <Link
+              to={`/genre/${genre.slug}`}
+              className={cx(
+                'inline-block rounded-full border border-edge px-3.5 py-1.5 text-ink-muted text-sm transition-all duration-200 ease-snappy hover:scale-105',
+                accentHoverClass(index),
+              )}
+            >
               {genre.name}
             </Link>
           </li>

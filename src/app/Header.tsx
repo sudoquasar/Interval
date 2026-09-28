@@ -4,7 +4,7 @@ import { cx } from '../lib/cx';
 import { isRegion, usePreferences } from '../store/preferences';
 import { useUi } from '../store/ui';
 import { useWatchlist } from '../store/watchlist';
-import { SearchIcon } from '../ui/icons';
+import { ChevronDownIcon, SearchIcon } from '../ui/icons';
 import { Kbd } from '../ui/Kbd';
 import { preloadPalette } from './overlays';
 import { modKeyLabel } from './shortcuts';
@@ -18,9 +18,9 @@ function SearchTrigger() {
       onPointerEnter={preloadPalette}
       onFocus={preloadPalette}
       aria-label="Search films and series"
-      className="flex h-9 min-w-9 items-center gap-2 rounded-sm border border-edge bg-surface px-2.5 text-sm text-ink-muted hover:border-ink-muted hover:text-ink sm:w-72 sm:px-3"
+      className="group flex h-9 min-w-9 items-center gap-2 rounded-lg border border-edge bg-surface px-2.5 text-sm text-ink-muted transition-colors duration-200 hover:border-marigold/60 hover:text-ink sm:w-72 sm:px-3"
     >
-      <SearchIcon className="size-4 shrink-0" />
+      <SearchIcon className="size-4 shrink-0 transition-colors group-hover:text-marigold" />
       <span className="hidden sm:inline">Search films and series</span>
       <span className="ml-auto hidden sm:inline-flex">
         <Kbd>{modKeyLabel()} K</Kbd>
@@ -29,11 +29,13 @@ function SearchTrigger() {
   );
 }
 
+/** A quiet text control, not a boxed <select> — one less border in a header that already has four
+ * elements competing for attention. */
 function RegionSelect() {
   const region = usePreferences((s) => s.region);
   const setRegion = usePreferences((s) => s.setRegion);
   return (
-    <>
+    <div className="relative flex h-9 items-center">
       <label htmlFor="region-select" className="sr-only">
         Region for the popular list
       </label>
@@ -44,24 +46,28 @@ function RegionSelect() {
           if (isRegion(event.target.value)) setRegion(event.target.value);
         }}
         title="Changes which Popular list you see"
-        className="h-9 rounded-sm border border-edge bg-surface px-2 text-sm text-ink hover:border-ink-muted"
+        className="peer h-9 cursor-pointer appearance-none bg-transparent py-1 pr-5 pl-1 text-ink-muted text-sm transition-colors hover:text-ink focus-visible:text-ink"
       >
         {app.regions.map((code) => (
-          <option key={code} value={code}>
+          <option key={code} value={code} className="bg-surface text-ink">
             {code}
           </option>
         ))}
       </select>
-    </>
+      <ChevronDownIcon className="pointer-events-none absolute right-0 size-3.5 text-ink-muted transition-colors peer-hover:text-ink" />
+    </div>
   );
 }
 
 export function Header() {
   const saved = useWatchlist((s) => s.items.length);
   return (
-    <header className="sticky top-0 z-30 border-edge border-b bg-ground/95">
+    <header className="sticky top-0 z-30 border-edge border-b bg-ground/85 backdrop-blur-md">
       <div className="flex h-14 items-center gap-3 px-4 sm:gap-5 sm:px-8">
-        <Link to="/" className="mr-auto font-display font-semibold text-lg tracking-tight">
+        <Link
+          to="/"
+          className="mr-auto font-display font-semibold text-lg tracking-tight transition-colors hover:text-marigold"
+        >
           {app.name}
         </Link>
         <SearchTrigger />
@@ -70,14 +76,17 @@ export function Header() {
           to="/watchlist"
           className={({ isActive }) =>
             cx(
-              'flex h-9 items-center gap-1.5 text-sm hover:text-ink',
+              'flex h-9 items-center gap-1.5 text-sm transition-colors hover:text-marigold',
               isActive ? 'text-ink' : 'text-ink-muted',
             )
           }
         >
           Watchlist
           {saved > 0 && (
-            <span className="tabular-nums text-ink-muted text-xs">
+            <span
+              key={saved}
+              className="inline-flex min-w-[1.25rem] animate-pop items-center justify-center rounded-full bg-coral/20 px-1.5 py-0.5 tabular-nums text-coral text-xs"
+            >
               <span className="sr-only">(</span>
               {saved}
               <span className="sr-only"> saved)</span>

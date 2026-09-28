@@ -4,19 +4,28 @@
 @import '@fontsource-variable/noto-sans-devanagari';
 
 /*
- * PLAN.md §6.2. The palette is reset so only these tokens exist: if a colour is not here,
- * it does not belong in the interface. Marigold is THE accent; count its uses on a page.
+ * PLAN.md §6.2 (redesign: docs/DECISIONS.md "lively minimalist" entry). The base stays a calm
+ * dark aubergine so posters keep supplying the loudest colour, but the accent family grew from
+ * one gold to a curated jewel-tone set, each with one job, and interaction is welcome again:
+ * hover, motion and colour are how the interface earns "lively" without turning into clutter.
  */
 @theme {
   --color-*: initial;
   --color-ground: #1c1420;
   --color-surface: #281c2e;
+  --color-surface-high: #33243b;
   --color-edge: #3c2d43;
   --color-ink: #f2ede4;
   --color-ink-muted: #a0919e;
+
+  /* One job each: marigold acts, verdigris affirms, coral delights, violet categorises, azure
+     informs, rot warns. Still a small, closed set — variety with a system behind it. */
   --color-marigold: #e8a33d;
-  --color-verdigris: #2e7d6f;
-  --color-rot: #c0503c;
+  --color-verdigris: #33b39b;
+  --color-coral: #f2577c;
+  --color-violet: #a672e0;
+  --color-azure: #4fade8;
+  --color-rot: #e2583f;
 
   --font-*: initial;
   --font-display:
@@ -42,8 +51,13 @@
   --text-3xl: 4rem;
   --text-3xl--line-height: 0.95;
 
-  /* A printed poster's corner, not a phone app's. */
+  /* A printed poster's corner, not a phone app's — reserved for posters and imagery.
+     Interactive chrome (buttons, fields, dialogs, chips) uses Tailwind's default md/lg/full
+     scale instead, so touch and content read as two deliberately different materials. */
   --radius-sm: 2px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snappy: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @layer base {
@@ -85,4 +99,102 @@
 
 @utility measure {
   max-width: 68ch;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.6s var(--ease-out-expo) both;
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.2s ease-out both;
+}
+
+@utility animate-scale-in {
+  animation: scale-in 0.18s var(--ease-out-expo) both;
+}
+
+@utility animate-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgb(242 237 228 / 8%) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@utility animate-pop {
+  animation: pop 0.5s var(--ease-out-expo);
+}
+
+@utility animate-kenburns {
+  animation: kenburns 20s var(--ease-out-expo) forwards;
 }

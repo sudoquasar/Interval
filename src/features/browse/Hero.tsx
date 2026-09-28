@@ -68,7 +68,7 @@ function Backdrop({ path }: { path: string }) {
             onError={() => setFailed(true)}
             className={cx(
               'absolute inset-0 -z-10 h-full w-full object-cover transition-opacity duration-700 ease-out motion-reduce:transition-none',
-              loaded ? 'opacity-100' : 'opacity-0',
+              loaded ? 'animate-kenburns opacity-100' : 'opacity-0',
             )}
           />
         </>
@@ -97,19 +97,31 @@ export function Hero() {
     <section aria-labelledby="hero-title" className={FRAME}>
       <Backdrop path={item.backdrop} />
       <div className="max-w-4xl px-4 pb-10 sm:px-8 sm:pb-14">
-        <p className="text-ink-muted text-sm">Trending this week · {typeLabel(item)}</p>
+        <p className="animate-fade-up text-ink-muted text-sm">
+          Trending this week · {typeLabel(item)}
+        </p>
         <h2
           id="hero-title"
-          className="mt-2 font-display font-semibold text-2xl sm:text-3xl"
-          style={{ fontStretch: titleStretch(item.title, 20) }}
+          className="mt-2 animate-fade-up font-display font-semibold text-2xl sm:text-3xl"
+          style={{ fontStretch: titleStretch(item.title, 20), animationDelay: '80ms' }}
         >
           {item.title}
         </h2>
-        <p className="mt-3 text-sm">{[item.year, genres, scores].filter(Boolean).join(' · ')}</p>
+        <p className="mt-3 animate-fade-up text-sm" style={{ animationDelay: '140ms' }}>
+          {[item.year, genres, scores].filter(Boolean).join(' · ')}
+        </p>
         {item.overview && (
-          <p className="mt-3 line-clamp-3 max-w-[60ch] text-base text-ink/90">{item.overview}</p>
+          <p
+            className="mt-3 line-clamp-3 max-w-[60ch] animate-fade-up text-base text-ink/90"
+            style={{ animationDelay: '200ms' }}
+          >
+            {item.overview}
+          </p>
         )}
-        <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div
+          className="mt-6 flex animate-fade-up flex-wrap items-center gap-3"
+          style={{ animationDelay: '260ms' }}
+        >
           <Link to={titlePath(item)} className={buttonClass('primary')}>
             See details
           </Link>

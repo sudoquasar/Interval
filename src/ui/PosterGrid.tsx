@@ -3,7 +3,7 @@ import { type TitleSummary, titleKey } from '../lib/model';
 import { GRID_CARD_SIZES, PosterCard, PosterCardSkeleton } from './PosterCard';
 
 const GRID_CLASS =
-  'grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-x-3 gap-y-8 sm:grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))]';
+  'grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-x-4 gap-y-10 sm:grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))]';
 
 export function PosterGrid({
   items,
@@ -14,8 +14,12 @@ export function PosterGrid({
 }) {
   return (
     <ul className={GRID_CLASS}>
-      {items.map((item) => (
-        <li key={titleKey(item.type, item.id)}>
+      {items.map((item, index) => (
+        <li
+          key={titleKey(item.type, item.id)}
+          className="animate-fade-up"
+          style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+        >
           <PosterCard item={item} sizes={GRID_CARD_SIZES} />
           {renderBelow?.(item)}
         </li>

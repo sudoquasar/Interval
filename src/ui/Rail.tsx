@@ -1,5 +1,6 @@
 import { useId, useRef } from 'react';
 import { Link } from 'react-router';
+import { cx } from '../lib/cx';
 import { type TitleSummary, titleKey } from '../lib/model';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons';
 import { PosterCard, PosterCardSkeleton, RAIL_CARD_SIZES } from './PosterCard';
@@ -36,22 +37,25 @@ export function Rail({ title, items = [], loading = false, moreHref, eagerCount 
   if (!loading && items.length === 0) return null;
 
   return (
-    <section aria-labelledby={headingId} className="mt-10">
+    <section aria-labelledby={headingId} className="mt-14">
       <div className="flex items-baseline gap-4 px-4 sm:px-8">
         <h2 id={headingId} className="font-display font-semibold text-lg">
           {title}
         </h2>
         {moreHref && (
-          <Link to={moreHref} className="text-ink-muted text-sm hover:text-ink">
+          <Link
+            to={moreHref}
+            className="text-ink-muted text-sm transition-colors hover:text-marigold"
+          >
             See all<span className="sr-only"> {title}</span>
           </Link>
         )}
-        <div className="ml-auto hidden gap-1 self-center md:flex">
+        <div className="ml-auto hidden gap-1.5 self-center md:flex">
           <button
             type="button"
             onClick={() => scroll(-1)}
             aria-label={`Scroll ${title} back`}
-            className="grid size-8 place-items-center rounded-sm text-ink-muted hover:bg-surface hover:text-ink"
+            className="grid size-9 place-items-center rounded-full text-ink-muted transition-all duration-200 ease-snappy hover:scale-110 hover:bg-surface-high hover:text-marigold active:scale-95"
           >
             <ChevronLeftIcon className="size-4" />
           </button>
@@ -59,7 +63,7 @@ export function Rail({ title, items = [], loading = false, moreHref, eagerCount 
             type="button"
             onClick={() => scroll(1)}
             aria-label={`Scroll ${title} forward`}
-            className="grid size-8 place-items-center rounded-sm text-ink-muted hover:bg-surface hover:text-ink"
+            className="grid size-9 place-items-center rounded-full text-ink-muted transition-all duration-200 ease-snappy hover:scale-110 hover:bg-surface-high hover:text-marigold active:scale-95"
           >
             <ChevronRightIcon className="size-4" />
           </button>
@@ -67,7 +71,7 @@ export function Rail({ title, items = [], loading = false, moreHref, eagerCount 
       </div>
       <ul
         ref={scroller}
-        className="scrollbar-quiet mt-3 flex snap-x gap-3 overflow-x-auto scroll-px-4 px-4 pb-3 sm:scroll-px-8 sm:px-8"
+        className="scrollbar-quiet mt-4 flex snap-x gap-4 overflow-x-auto scroll-px-4 px-4 pb-3 sm:scroll-px-8 sm:px-8"
         aria-busy={loading || undefined}
       >
         {loading
@@ -77,7 +81,11 @@ export function Rail({ title, items = [], loading = false, moreHref, eagerCount 
               </li>
             ))
           : items.map((item, index) => (
-              <li key={titleKey(item.type, item.id)} className={ITEM_CLASS}>
+              <li
+                key={titleKey(item.type, item.id)}
+                className={cx(ITEM_CLASS, 'animate-fade-up')}
+                style={{ animationDelay: `${Math.min(index * 40, 320)}ms` }}
+              >
                 <PosterCard item={item} sizes={RAIL_CARD_SIZES} priority={index < eagerCount} />
               </li>
             ))}
