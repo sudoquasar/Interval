@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { movieDetailToModel, pickTrailer, toSummary, truncate, tvDetailToModel } from './model';
-import type { TmdbMovieDetail, TmdbTvDetail, TmdbVideo } from './tmdb-types';
+import type { TmdbMovieDetail, TmdbTvDetail, TmdbVideo, TmdbWatchProviders } from './tmdb-types';
 
 const base = {
   poster_path: '/p.jpg',
@@ -159,5 +159,80 @@ describe('detail mappers', () => {
       ongoing: true,
       endYear: null,
     });
+  });
+
+  const watchProviders: TmdbWatchProviders = {
+    results: {
+      IN: {
+        link: 'https://x',
+        flatrate: [
+          { provider_id: 8, provider_name: 'Netflix', logo_path: null, display_priority: 0 },
+        ],
+      },
+      US: {
+        link: 'https://y',
+        flatrate: [
+          { provider_id: 15, provider_name: 'Hulu', logo_path: null, display_priority: 0 },
+        ],
+      },
+    },
+  };
+
+  it("sets watch from the 'watch/providers' append, limited to the requested regions", () => {
+    const raw: TmdbMovieDetail = {
+      ...base,
+      id: 19404,
+      title: 'Dilwale Dulhania Le Jayenge',
+      original_title: 'Dilwale Dulhania Le Jayenge',
+      release_date: '1995-10-20',
+      genres: [],
+      runtime: 190,
+      tagline: '',
+      status: 'Released',
+      imdb_id: 'tt0112870',
+      'watch/providers': watchProviders,
+    };
+    const detail = movieDetailToModel(raw, ['IN']);
+    expect(detail.watch).toEqual({
+      checked: true,
+      region: 'IN',
+      link: 'https://x',
+      stream: [8],
+      free: [],
+      ads: [],
+      rent: [],
+      buy: [],
+    });
+    expect(detail.watchByRegion).toEqual({
+      IN: {
+        checked: true,
+        region: 'IN',
+        link: 'https://x',
+        stream: [8],
+        free: [],
+        ads: [],
+        rent: [],
+        buy: [],
+      },
+    });
+  });
+
+  it("marks watch as unchecked when 'watch/providers' is absent", () => {
+    const raw: TmdbMovieDetail = {
+      ...base,
+      id: 19404,
+      title: 'Dilwale Dulhania Le Jayenge',
+      original_title: 'Dilwale Dulhania Le Jayenge',
+      release_date: '1995-10-20',
+      genres: [],
+      runtime: 190,
+      tagline: '',
+      status: 'Released',
+      imdb_id: 'tt0112870',
+    };
+    const detail = movieDetailToModel(raw);
+    expect(detail.watch).toEqual({ checked: false });
+    expect(detail.watchByRegion).toEqual({});
+    expect(detail.providerInfo).toEqual({});
   });
 });

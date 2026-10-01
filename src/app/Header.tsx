@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router';
 import { app } from '../../config/app.config';
+import { ServicesButton } from '../features/watch/ServicesButton';
 import { cx } from '../lib/cx';
 import { isRegion, usePreferences } from '../store/preferences';
 import { useTheme } from '../store/theme';
@@ -94,6 +95,7 @@ export function Header() {
         </Link>
         <SearchTrigger />
         <RegionSelect />
+        {app.features.watchProviders && <ServicesButton />}
         <ThemeToggle />
         <NavLink
           to="/watchlist"

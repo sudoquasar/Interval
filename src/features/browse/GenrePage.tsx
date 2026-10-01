@@ -7,13 +7,16 @@ import { formatCount, languageName } from '../../lib/format';
 import { type Genre, genreBySlug } from '../../lib/genres';
 import { useDocumentTitle } from '../../lib/hooks';
 import type { MediaType } from '../../lib/model';
+import { useOwnedSet } from '../../lib/providers';
 import { useDiscover } from '../../lib/queries';
+import { usePreferences } from '../../store/preferences';
 import { Button } from '../../ui/Button';
 import { Notice } from '../../ui/Notice';
 import { Pagination } from '../../ui/Pagination';
 import { PosterGrid, PosterGridSkeleton } from '../../ui/PosterGrid';
 import { QueryError } from '../../ui/QueryError';
 import { Select } from '../../ui/Select';
+import { WatchableToggle } from '../watch/WatchableToggle';
 import {
   defaultType,
   filtersToSearch,
@@ -123,9 +126,19 @@ function GenreView({ genre }: { genre: Genre }) {
   const today = now.toISOString().slice(0, 10);
 
   const filters = parseFilters(params, genre, currentYear);
+  const ownedIds = usePreferences((s) => s.ownedProviders);
+  const owned = useOwnedSet(ownedIds);
+  const watchableOnly = usePreferences((s) => s.watchableOnly);
+  const watchActive = app.features.watchProviders && watchableOnly && ownedIds.length > 0;
   const query = useDiscover(
     filters.type,
-    toDiscoverParams(filters, genre, today, app.minVoteCount),
+    toDiscoverParams(
+      filters,
+      genre,
+      today,
+      app.minVoteCount,
+      watchActive ? { owned, region: app.defaultRegion } : undefined,
+    ),
   );
   const noun = filters.type === 'movie' ? 'films' : 'series';
   useDocumentTitle(`${genre.name} ${noun}`);
@@ -219,11 +232,16 @@ function GenreView({ genre }: { genre: Genre }) {
             Clear filters
           </Button>
         )}
+        {app.features.watchProviders && (
+          <div className="h-9 content-center">
+            <WatchableToggle />
+          </div>
+        )}
       </form>
 
       <p aria-live="polite" className="mt-8 h-6 text-ink-muted text-sm">
         {data && !query.isPlaceholderData
-          ? `${formatCount(data.totalResults)} ${noun}${filters.page > 1 ? `, page ${filters.page}` : ''}`
+          ? `${formatCount(data.totalResults)} ${noun}${watchActive ? ' on your services' : ''}${filters.page > 1 ? `, page ${filters.page}` : ''}`
           : ''}
       </p>
 

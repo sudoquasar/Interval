@@ -2,7 +2,13 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { CatalogRail } from './catalog-format';
 import { DATA_VERSION, fetchData } from './data';
 import type { MediaType } from './model';
-import { discoverTitles, discoverTitlesPages, getTitle, searchTitles } from './tmdb';
+import {
+  discoverTitles,
+  discoverTitlesPages,
+  getTitle,
+  getWatchProviders,
+  searchTitles,
+} from './tmdb';
 
 /**
  * Every TMDB query key starts with 'tmdb'. Only those are persisted to localStorage; catalogue
@@ -15,12 +21,21 @@ export const queryKeys = {
   discover: (type: MediaType, params: Record<string, string | number>) =>
     ['tmdb', 'discover', type, params] as const,
   rail: (id: string) => ['catalog', id, DATA_VERSION] as const,
+  watch: (type: MediaType, id: number) => ['tmdb', 'watch', type, id] as const,
 };
 
 export function useTitle(type: MediaType, id: number) {
   return useQuery({
     queryKey: queryKeys.title(type, id),
     queryFn: ({ signal }) => getTitle(type, id, signal),
+  });
+}
+
+export function useWatchProviders(type: MediaType, id: number, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.watch(type, id),
+    queryFn: ({ signal }) => getWatchProviders(type, id, signal),
+    enabled,
   });
 }
 

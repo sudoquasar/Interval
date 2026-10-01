@@ -29,8 +29,24 @@ export function Footer() {
           <a href="https://www.themoviedb.org/" className="shrink-0" rel="noreferrer">
             <TmdbLogo />
           </a>
-          <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+          <p>
+            This website uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise
+            approved by TMDB.
+          </p>
         </div>
+        {app.features.watchProviders && (
+          <p>
+            Where-to-watch listings: availability data by{' '}
+            <a
+              href="https://www.justwatch.com/"
+              className="underline underline-offset-2 transition-colors hover:text-marigold"
+              rel="noreferrer"
+            >
+              JustWatch
+            </a>
+            , via TMDB.
+          </p>
+        )}
         <p>
           IMDb, Rotten Tomatoes and Metacritic scores come from the{' '}
           <a

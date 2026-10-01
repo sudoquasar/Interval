@@ -1,0 +1,8 @@
+[
+  { "id": 8, "name": "Netflix", "logo": "/netflix.png", "priority": 0 },
+  { "id": 119, "name": "Amazon Prime Video", "logo": "/prime.png", "priority": 1 },
+  { "id": 350, "name": "Apple TV", "logo": "/apple.png", "priority": 2 },
+  { "id": 2336, "name": "JioHotstar", "logo": "/jiohotstar.png", "priority": 3 },
+  { "id": 232, "name": "Zee5", "logo": "/zee5.png", "priority": 7 },
+  { "id": 237, "name": "Sony Liv", "logo": "/sonyliv.png", "priority": 10 }
+]

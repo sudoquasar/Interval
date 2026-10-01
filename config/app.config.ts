@@ -7,7 +7,7 @@ export const app = {
   tmdbStaleMinutes: 60,
   ratingsCacheTtlMinutes: 60,
   priceStaleAfterDays: 120, // hide prices older than this
-  features: { watchProviders: false, ai: false, groups: false },
+  features: { watchProviders: true, ai: false, groups: false },
 } as const;
 
 export type Region = (typeof app.regions)[number];

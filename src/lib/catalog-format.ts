@@ -38,4 +38,12 @@ export interface DataMeta {
     omdbRequests: number;
     updated: string;
   };
+  providers?: {
+    titles: number;
+    checked: number;
+    fromCache: number;
+    unchecked: number;
+    tmdbRequests: number;
+    catalog: number;
+  };
 }

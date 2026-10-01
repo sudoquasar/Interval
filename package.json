@@ -20,6 +20,7 @@
     "e2e": "playwright test",
     "check:bundle": "tsx scripts/check-bundle.ts",
     "data:catalog": "tsx scripts/build-catalog.ts",
+    "data:providers": "tsx scripts/build-providers.ts",
     "data:ratings": "tsx scripts/build-ratings.ts",
     "data:pull": "sh scripts/pull-data.sh"
   },

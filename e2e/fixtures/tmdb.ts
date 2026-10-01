@@ -73,6 +73,113 @@ export const ddljDetail = {
     ],
   },
   external_ids: { imdb_id: 'tt0112870' },
+  'watch/providers': {
+    results: {
+      IN: {
+        link: 'https://www.themoviedb.org/movie/19404/watch?locale=IN',
+        flatrate: [
+          {
+            provider_id: 8,
+            provider_name: 'Netflix',
+            logo_path: '/netflix.png',
+            display_priority: 0,
+          },
+        ],
+        rent: [
+          {
+            provider_id: 2,
+            provider_name: 'Apple TV Store',
+            logo_path: '/apple.png',
+            display_priority: 5,
+          },
+          {
+            provider_id: 3,
+            provider_name: 'Google Play Movies',
+            logo_path: '/google.png',
+            display_priority: 8,
+          },
+          {
+            provider_id: 192,
+            provider_name: 'YouTube',
+            logo_path: '/youtube.png',
+            display_priority: 11,
+          },
+        ],
+        buy: [
+          {
+            provider_id: 2,
+            provider_name: 'Apple TV Store',
+            logo_path: '/apple.png',
+            display_priority: 5,
+          },
+          {
+            provider_id: 3,
+            provider_name: 'Google Play Movies',
+            logo_path: '/google.png',
+            display_priority: 8,
+          },
+          {
+            provider_id: 192,
+            provider_name: 'YouTube',
+            logo_path: '/youtube.png',
+            display_priority: 11,
+          },
+        ],
+      },
+      // A second region with listings, so the region select appears.
+      GB: {
+        link: 'https://www.themoviedb.org/movie/19404/watch?locale=GB',
+        flatrate: [
+          {
+            provider_id: 8,
+            provider_name: 'Netflix',
+            logo_path: '/netflix.png',
+            display_priority: 0,
+          },
+        ],
+      },
+    },
+  },
+};
+
+/** The standalone `/movie/{id}/watch/providers` response — same data as the append above, used
+ * by search's per-result lookups (docs/phase-2-plan.md §3.5). */
+export const ddljProvidersOnly = {
+  id: 19404,
+  results: ddljDetail['watch/providers'].results,
+};
+
+/** Panchayat (tv 9001 in the catalog fixtures): Prime Video appears in both `flatrate` and its
+ * "with Ads" variant, per the real response documented in docs/phase-2-plan.md §2.1. */
+export const panchayatProviders = {
+  id: 9001,
+  results: {
+    IN: {
+      link: 'https://www.themoviedb.org/tv/9001/watch?locale=IN',
+      flatrate: [
+        {
+          provider_id: 119,
+          provider_name: 'Amazon Prime Video',
+          logo_path: '/prime.png',
+          display_priority: 1,
+        },
+        {
+          provider_id: 2100,
+          provider_name: 'Amazon Prime Video with Ads',
+          logo_path: '/prime.png',
+          display_priority: 71,
+        },
+      ],
+      free: [
+        {
+          provider_id: 119,
+          provider_name: 'Amazon Prime Video',
+          logo_path: '/prime.png',
+          display_priority: 1,
+        },
+      ],
+    },
+  },
 };
 
 export const tenetSearch = {

@@ -27,7 +27,7 @@ function matches(text: string, query: string): boolean {
 export default function CommandPalette() {
   const open = useUi((s) => s.overlay === 'palette');
   const close = useUi((s) => s.close);
-  const showShortcuts = useUi((s) => s.open);
+  const openOverlay = useUi((s) => s.open);
   const region = usePreferences((s) => s.region);
   const setRegion = usePreferences((s) => s.setRegion);
   const navigate = useNavigate();
@@ -59,7 +59,10 @@ export default function CommandPalette() {
   const pages = [
     { label: 'Home', run: () => go('/') },
     { label: 'Watchlist', run: () => go('/watchlist') },
-    { label: 'Keyboard shortcuts', run: () => showShortcuts('shortcuts') },
+    { label: 'Keyboard shortcuts', run: () => openOverlay('shortcuts') },
+    ...(app.features.watchProviders
+      ? [{ label: 'Your streaming services', run: () => openOverlay('services') }]
+      : []),
   ].filter((p) => matches(p.label, needle));
 
   return (

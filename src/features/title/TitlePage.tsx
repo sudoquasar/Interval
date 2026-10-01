@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { app } from '../../../config/app.config';
 import { NotFound } from '../../app/NotFound';
 import { accentHoverClass } from '../../lib/accents';
 import { cx } from '../../lib/cx';
@@ -8,6 +9,7 @@ import { genreForId } from '../../lib/genres';
 import { useDocumentTitle } from '../../lib/hooks';
 import { tmdbImage } from '../../lib/images';
 import type { MediaType, TitleDetail } from '../../lib/model';
+import { usePrices } from '../../lib/providers';
 import { useTitle } from '../../lib/queries';
 import { useRatings } from '../../lib/ratings';
 import { toCardScores } from '../../lib/ratings-format';
@@ -20,6 +22,7 @@ import { PosterImage } from '../../ui/PosterImage';
 import { QueryError } from '../../ui/QueryError';
 import { Rail } from '../../ui/Rail';
 import { Scorecard } from '../../ui/Scorecard';
+import { WatchBlock } from '../watch/WatchBlock';
 import { WatchlistButton } from '../watchlist/WatchlistButton';
 
 const COLUMNS =
@@ -162,6 +165,8 @@ function TitleContent({ detail }: { detail: TitleDetail }) {
               )}
             </div>
 
+            {app.features.watchProviders && <WatchBlock detail={detail} />}
+
             {detail.tagline && (
               <p className="mt-10 font-display text-ink-muted text-lg">{detail.tagline}</p>
             )}
@@ -272,6 +277,7 @@ function TitleSkeleton() {
 
 function TitleView({ type, id }: { type: MediaType; id: number }) {
   const query = useTitle(type, id);
+  usePrices(); // Started here so it downloads in parallel with the detail call, not after it.
   const detail = query.data;
   useDocumentTitle(detail ? `${detail.title}${detail.year ? ` (${detail.year})` : ''}` : null);
 
